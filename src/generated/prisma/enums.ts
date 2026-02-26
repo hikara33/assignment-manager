@@ -15,3 +15,13 @@ export const UserRole = {
 } as const
 
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
+export const AssignmentStatus = {
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  OVERDUE: 'OVERDUE',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type AssignmentStatus = (typeof AssignmentStatus)[keyof typeof AssignmentStatus]
