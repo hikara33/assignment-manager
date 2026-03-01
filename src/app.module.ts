@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AssignmentModule } from './assignment/assignment.module';
+import { SubjectModule } from './subject/subject.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { AssignmentModule } from './assignment/assignment.module';
     PrismaModule,
     AuthModule,
     PrismaModule,
-    AssignmentModule
+    AssignmentModule,
+    SubjectModule
   ],
   controllers: [AppController],
   providers: [AppService],

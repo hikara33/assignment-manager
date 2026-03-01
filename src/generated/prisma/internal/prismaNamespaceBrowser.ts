@@ -102,7 +102,7 @@ export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[k
 export const AssignmentScalarFieldEnum = {
   id: 'id',
   title: 'title',
-  descripion: 'descripion',
+  description: 'description',
   dueDay: 'dueDay',
   status: 'status',
   userId: 'userId',

@@ -54,7 +54,7 @@ model Assignment {
   id String @id @default(uuid())
 
   title      String
-  descripion String?
+  description String?
 
   dueDay DateTime
   status AssignmentStatus @default(PENDING)
