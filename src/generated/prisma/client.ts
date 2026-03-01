@@ -47,3 +47,18 @@ export type User = Prisma.UserModel
  * 
  */
 export type RefreshToken = Prisma.RefreshTokenModel
+/**
+ * Model Assignment
+ * 
+ */
+export type Assignment = Prisma.AssignmentModel
+/**
+ * Model Subject
+ * 
+ */
+export type Subject = Prisma.SubjectModel
+/**
+ * Model Group
+ * 
+ */
+export type Group = Prisma.GroupModel

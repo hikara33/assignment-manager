@@ -23,7 +23,11 @@ model User {
   name String
   role UserRole @default(STUDENT)
 
+  groupId String? @map("group_id")
+  group   Group?  @relation("group-users", fields: [groupId], references: [id])
+
   refreshTokens RefreshToken[] @relation("user-tokens")
+  assignments   Assignment[]   @relation("user-assignemnts")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
@@ -36,7 +40,7 @@ model RefreshToken {
 
   hashToken String
 
-  userId String
+  userId String @map("user_id")
   user   User   @relation("user-tokens", fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -46,7 +50,66 @@ model RefreshToken {
   @@map("refresh-tokens")
 }
 
+model Assignment {
+  id String @id @default(uuid())
+
+  title      String
+  descripion String?
+
+  dueDay DateTime
+  status AssignmentStatus @default(PENDING)
+
+  userId String @map("user_id")
+  user   User   @relation("user-assignemnts", fields: [userId], references: [id])
+
+  subjectId String  @map("subject_id")
+  subject   Subject @relation("subject-assignments", fields: [subjectId], references: [id])
+
+  groupId String? @map("group_id")
+  group   Group?  @relation("group-assignemnts", fields: [groupId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
+
+  @@map("assignments")
+}
+
+model Subject {
+  id String @id @default(ulid())
+
+  name        String  @unique
+  description String?
+
+  assignments Assignment[] @relation("subject-assignments")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
+
+  @@map("subjects")
+}
+
+model Group {
+  id String @id @default(uuid())
+
+  name String @unique
+
+  users       User[]       @relation("group-users")
+  assignments Assignment[] @relation("group-assignemnts")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
+
+  @@map("groups")
+}
+
 enum UserRole {
   ADMIN
   STUDENT
+}
+
+enum AssignmentStatus {
+  PENDING
+  COMPLETED
+  OVERDUE
+  ARCHIVED
 }
