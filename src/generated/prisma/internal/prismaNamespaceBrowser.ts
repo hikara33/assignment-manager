@@ -55,7 +55,9 @@ export const ModelName = {
   RefreshToken: 'RefreshToken',
   Assignment: 'Assignment',
   Subject: 'Subject',
-  Group: 'Group'
+  Group: 'Group',
+  UserGroup: 'UserGroup',
+  GroupInvite: 'GroupInvite'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -80,7 +82,6 @@ export const UserScalarFieldEnum = {
   password: 'password',
   name: 'name',
   role: 'role',
-  groupId: 'groupId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -134,6 +135,31 @@ export const GroupScalarFieldEnum = {
 } as const
 
 export type GroupScalarFieldEnum = (typeof GroupScalarFieldEnum)[keyof typeof GroupScalarFieldEnum]
+
+
+export const UserGroupScalarFieldEnum = {
+  userId: 'userId',
+  groupId: 'groupId',
+  role: 'role'
+} as const
+
+export type UserGroupScalarFieldEnum = (typeof UserGroupScalarFieldEnum)[keyof typeof UserGroupScalarFieldEnum]
+
+
+export const GroupInviteScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  token: 'token',
+  groupId: 'groupId',
+  invitedById: 'invitedById',
+  status: 'status',
+  expiresAt: 'expiresAt',
+  acceptedAt: 'acceptedAt',
+  declinedAt: 'declinedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type GroupInviteScalarFieldEnum = (typeof GroupInviteScalarFieldEnum)[keyof typeof GroupInviteScalarFieldEnum]
 
 
 export const SortOrder = {

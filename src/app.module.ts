@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { AssignmentModule } from './assignment/assignment.module';
 import { SubjectModule } from './subject/subject.module';
+import { GroupModule } from './group/group.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SubjectModule } from './subject/subject.module';
     PrismaModule,
     AssignmentModule,
     SubjectModule,
+    GroupModule,
   ],
   controllers: [AppController],
   providers: [AppService],

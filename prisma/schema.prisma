@@ -23,11 +23,11 @@ model User {
   name String
   role UserRole @default(STUDENT)
 
-  groupId String? @map("group_id")
-  group   Group?  @relation("group-users", fields: [groupId], references: [id])
+  groups UserGroup[]
 
   refreshTokens RefreshToken[] @relation("user-tokens")
   assignments   Assignment[]   @relation("user-assignemnts")
+  invites       GroupInvite[]  @relation("user-invites")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
@@ -53,7 +53,7 @@ model RefreshToken {
 model Assignment {
   id String @id @default(uuid())
 
-  title      String
+  title       String
   description String?
 
   dueDay DateTime
@@ -94,13 +94,52 @@ model Group {
 
   name String @unique
 
-  users       User[]       @relation("group-users")
-  assignments Assignment[] @relation("group-assignemnts")
+  assignments Assignment[]  @relation("group-assignemnts")
+  invites     GroupInvite[] @relation("group_invites")
+  members     UserGroup[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
 
   @@map("groups")
+}
+
+model UserGroup {
+  userId  String @map("user_id")
+  groupId String @map("group_id")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  role GroupRole @default(MEMBER)
+
+  @@id([userId, groupId])
+  @@map("users_groups")
+}
+
+model GroupInvite {
+  id String @id @default(uuid())
+
+  email String
+  token String? @unique
+
+  groupId String @map("group_id")
+  group   Group  @relation("group_invites", fields: [groupId], references: [id], onDelete: Cascade)
+
+  invitedById String @map("invited_by_id")
+  invitedBy   User   @relation("user-invites", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  status InviteStatus @default(PENDING)
+
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  declinedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([groupId])
+  @@map("group_invites")
 }
 
 enum UserRole {
@@ -113,4 +152,16 @@ enum AssignmentStatus {
   COMPLETED
   OVERDUE
   ARCHIVED
+}
+
+enum GroupRole {
+  OWNER
+  MEMBER
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
 }

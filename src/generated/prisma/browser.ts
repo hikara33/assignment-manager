@@ -42,3 +42,13 @@ export type Subject = Prisma.SubjectModel
  * 
  */
 export type Group = Prisma.GroupModel
+/**
+ * Model UserGroup
+ * 
+ */
+export type UserGroup = Prisma.UserGroupModel
+/**
+ * Model GroupInvite
+ * 
+ */
+export type GroupInvite = Prisma.GroupInviteModel
