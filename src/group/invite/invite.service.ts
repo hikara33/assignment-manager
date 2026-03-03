@@ -21,48 +21,57 @@ export class InviteService {
   }
 
   async inviteUser(email: string, groupId: string, invitedById: string) {
-    const group = await this.prismaService.group.findUnique({
-      where: { id: groupId },
-    });
+    const token = this.generateToken(email, groupId, invitedById);
+    const hashToken = await bcrypt.hash(token, 10);
 
-    if (!group) throw new NotFoundException("Группа не найдена");
+    await this.prismaService.$transaction(async (prisma) => {
+      const group = await prisma.group.findUnique({
+        where: { id: groupId },
+      });
 
-    const existUser = await this.prismaService.user.findUnique({
-      where: { email },
-    });
+      if (!group) throw new NotFoundException("Группа не найдена");
 
-    if (existUser) {
-      const membership = await this.prismaService.userGroup.findUnique({
+      const inviterMemvership = await prisma.userGroup.findUnique({
         where: {
           userId_groupId: {
-            userId: existUser.id,
+            userId: invitedById,
             groupId,
           },
         },
       });
 
-      if (membership) {
-        throw new ConflictException("Пользователь уже состоит в группе");
+      if (!inviterMemvership || inviterMemvership.role !== "OWNER") {
+        throw new ConflictException("Отправлять приглашение может только владелец группы");
       }
-    }
 
-    const existingInvite = await this.prismaService.groupInvite.findFirst({
-      where: {
-        email,
-        groupId,
-        status: "PENDING",
-        expiresAt: { gt: new Date() },
-      },
-    });
+      const existUser = await prisma.user.findUnique({
+        where: { email },
+      });
 
-    if (existingInvite) {
-      throw new ConflictException("Приглашение уже отправлено");
-    }
+      if (existUser) {
+        const membership = await prisma.userGroup.findUnique({
+          where: {
+            userId_groupId: {
+              userId: existUser.id,
+              groupId,
+            },
+          },
+        });
 
-    const token = this.generateToken(email, groupId, invitedById);
-    const hashToken = await bcrypt.hash(token, 10);
+        if (membership) throw new ConflictException("Пользователь уже состоит в группе");
+      }
 
-    await this.prismaService.$transaction(async (prisma) => {
+      const existingInvite = await prisma.groupInvite.findFirst({
+        where: {
+          email,
+          groupId,
+          status: "PENDING",
+          expiresAt: { gt: new Date() },
+        },
+      });
+
+      if (existingInvite) throw new ConflictException("Приглашение уже отправлено");
+
       const invite = await prisma.groupInvite.create({
         data: {
           email,
