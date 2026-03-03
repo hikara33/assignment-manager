@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
@@ -86,6 +86,50 @@ export class InviteService {
     });
     
     await this.emailService.sendGroupInvite(email, token);
+  }
+
+  async acceptInvite(token: string, userId: string) {
+    return await this.prismaService.$transaction(async (prisma) => {
+      const payload: InvitePayload = await this.jwtService.verifyAsync(token);
+
+      if (payload.type !== "GROUP_INVITE") {
+        throw new ForbiddenException("Невалидный токен");
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) throw new NotFoundException("Пользователь не найден");
+
+      if (user.email !== payload.email) {
+        throw new ForbiddenException("Это не твое приглашение");
+      }
+
+      const existingMembership = await prisma.userGroup.findUnique({
+        where: {
+          userId_groupId: {
+            userId,
+            groupId: payload.groupId,
+          },
+        },
+      });
+      if (existingMembership) throw new ConflictException("Пользователь уже состоит в группе");
+
+      await prisma.userGroup.create({
+        data: {
+          userId,
+          groupId: payload.groupId,
+        },
+      });
+      await prisma.groupInvite.updateMany({
+        where: {
+          email: payload.email,
+          groupId: payload.groupId,
+          status: "PENDING",
+        },
+        data: { status: "ACCEPTED" },
+      });
+    });
   }
 
   private generateToken(email: string, groupId: string, invitedById: string) {
