@@ -5,7 +5,7 @@ import { SignOptions } from 'jsonwebtoken';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { InvitePayload } from '../interfaces/jwt-invite.interface';
-import * as bcrypt from "bcrypt";
+import * as crypto from 'crypto';
 
 @Injectable()
 export class InviteService {
@@ -22,7 +22,7 @@ export class InviteService {
 
   async inviteUser(email: string, groupId: string, invitedById: string) {
     const token = this.generateToken(email, groupId, invitedById);
-    const hashToken = await bcrypt.hash(token, 10);
+    const hashToken = this.hashToken(token);
 
     await this.prismaService.$transaction(async (prisma) => {
       const group = await prisma.group.findUnique({
@@ -31,7 +31,7 @@ export class InviteService {
 
       if (!group) throw new NotFoundException("Группа не найдена");
 
-      const inviterMemvership = await prisma.userGroup.findUnique({
+      const inviterMembership = await prisma.userGroup.findUnique({
         where: {
           userId_groupId: {
             userId: invitedById,
@@ -40,7 +40,7 @@ export class InviteService {
         },
       });
 
-      if (!inviterMemvership || inviterMemvership.role !== "OWNER") {
+      if (!inviterMembership || inviterMembership.role !== "OWNER") {
         throw new ConflictException("Отправлять приглашение может только владелец группы");
       }
 
@@ -101,5 +101,12 @@ export class InviteService {
     });
 
     return token;
+  }
+
+  private hashToken(token: string) {
+    return crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
   }
 }
