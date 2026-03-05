@@ -17,5 +17,6 @@ import { EmailModule } from '../email/email.module';
   ],
   controllers: [InviteController],
   providers: [InviteService],
+  exports: [InviteService]
 })
 export class InviteModule {}
