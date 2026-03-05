@@ -6,8 +6,7 @@ import { Prisma } from '@prisma/client/extension';
 @Injectable()
 export class GroupService {
   constructor(
-    private readonly prismaService: PrismaService,
-    private readonly inviteService: InviteService
+    private readonly prismaService: PrismaService
   ) {}
   
   async createGroup(userId: string, name: string) {
