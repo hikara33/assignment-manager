@@ -118,7 +118,7 @@ export class InviteService {
       });
       await prisma.groupInvite.update({
         where: { id: invite.id },
-        data: { status: "ACCEPTED" },
+        data: { status: "ACCEPTED", usedAt: new Date() },
       });
 
       return { message: "Вы успешно присоединились к группе" };
@@ -138,7 +138,7 @@ export class InviteService {
 
       await prisma.groupInvite.update({
         where: { id: invite.id },
-        data: { status: "DECLINED" },
+        data: { status: "DECLINED", usedAt: new Date() },
       });
 
       return { message: "Вы отклонили приглашение" };

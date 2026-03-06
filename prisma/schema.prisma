@@ -132,8 +132,7 @@ model GroupInvite {
   status InviteStatus @default(PENDING)
 
   expiresAt  DateTime
-  acceptedAt DateTime?
-  declinedAt DateTime?
+  usedAt DateTime?
 
   createdAt DateTime @default(now())
 

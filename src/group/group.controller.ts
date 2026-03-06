@@ -4,6 +4,7 @@ import { Authorization } from 'src/auth/decorators/authorization.decorator';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
 import { GroupRoleGuard } from './guards/group-role.guard';
 import { InviteService } from './invite/invite.service';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('group')
 export class GroupController {
@@ -21,8 +22,7 @@ export class GroupController {
     return this.groupService.createGroup(userId, name);
   }
 
-  @Authorization()
-  @UseGuards(GroupRoleGuard)
+  @UseGuards(JwtGuard, GroupRoleGuard)
   @Delete(':id')
   async delete(
     @Authorized('id') userId: string,
@@ -31,8 +31,7 @@ export class GroupController {
     return this.groupService.delete(userId, groupId);
   }
 
-  @Authorization()
-  @UseGuards(GroupRoleGuard)
+  @UseGuards(JwtGuard, GroupRoleGuard)
   @Patch(':id/owner')
   async shareOwner(
     @Authorized('id') userId: string,
@@ -42,8 +41,7 @@ export class GroupController {
     return this.groupService.shareOwnership(userId, newOwner, groupId);
   }
 
-  @Authorization()
-  @UseGuards(GroupRoleGuard)
+  @UseGuards(JwtGuard, GroupRoleGuard)
   @Post(':id/invite')
   async inviteUser(
     @Authorized('id') id: string,

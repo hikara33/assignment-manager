@@ -32,8 +32,7 @@ export type GroupInviteMinAggregateOutputType = {
   invitedById: string | null
   status: $Enums.InviteStatus | null
   expiresAt: Date | null
-  acceptedAt: Date | null
-  declinedAt: Date | null
+  usedAt: Date | null
   createdAt: Date | null
 }
 
@@ -45,8 +44,7 @@ export type GroupInviteMaxAggregateOutputType = {
   invitedById: string | null
   status: $Enums.InviteStatus | null
   expiresAt: Date | null
-  acceptedAt: Date | null
-  declinedAt: Date | null
+  usedAt: Date | null
   createdAt: Date | null
 }
 
@@ -58,8 +56,7 @@ export type GroupInviteCountAggregateOutputType = {
   invitedById: number
   status: number
   expiresAt: number
-  acceptedAt: number
-  declinedAt: number
+  usedAt: number
   createdAt: number
   _all: number
 }
@@ -73,8 +70,7 @@ export type GroupInviteMinAggregateInputType = {
   invitedById?: true
   status?: true
   expiresAt?: true
-  acceptedAt?: true
-  declinedAt?: true
+  usedAt?: true
   createdAt?: true
 }
 
@@ -86,8 +82,7 @@ export type GroupInviteMaxAggregateInputType = {
   invitedById?: true
   status?: true
   expiresAt?: true
-  acceptedAt?: true
-  declinedAt?: true
+  usedAt?: true
   createdAt?: true
 }
 
@@ -99,8 +94,7 @@ export type GroupInviteCountAggregateInputType = {
   invitedById?: true
   status?: true
   expiresAt?: true
-  acceptedAt?: true
-  declinedAt?: true
+  usedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -185,8 +179,7 @@ export type GroupInviteGroupByOutputType = {
   invitedById: string
   status: $Enums.InviteStatus
   expiresAt: Date
-  acceptedAt: Date | null
-  declinedAt: Date | null
+  usedAt: Date | null
   createdAt: Date
   _count: GroupInviteCountAggregateOutputType | null
   _min: GroupInviteMinAggregateOutputType | null
@@ -219,8 +212,7 @@ export type GroupInviteWhereInput = {
   invitedById?: Prisma.StringFilter<"GroupInvite"> | string
   status?: Prisma.EnumInviteStatusFilter<"GroupInvite"> | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFilter<"GroupInvite"> | Date | string
-  acceptedAt?: Prisma.DateTimeNullableFilter<"GroupInvite"> | Date | string | null
-  declinedAt?: Prisma.DateTimeNullableFilter<"GroupInvite"> | Date | string | null
+  usedAt?: Prisma.DateTimeNullableFilter<"GroupInvite"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"GroupInvite"> | Date | string
   group?: Prisma.XOR<Prisma.GroupScalarRelationFilter, Prisma.GroupWhereInput>
   invitedBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -234,8 +226,7 @@ export type GroupInviteOrderByWithRelationInput = {
   invitedById?: Prisma.SortOrder
   status?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  acceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  declinedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  usedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   group?: Prisma.GroupOrderByWithRelationInput
   invitedBy?: Prisma.UserOrderByWithRelationInput
@@ -252,8 +243,7 @@ export type GroupInviteWhereUniqueInput = Prisma.AtLeast<{
   invitedById?: Prisma.StringFilter<"GroupInvite"> | string
   status?: Prisma.EnumInviteStatusFilter<"GroupInvite"> | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFilter<"GroupInvite"> | Date | string
-  acceptedAt?: Prisma.DateTimeNullableFilter<"GroupInvite"> | Date | string | null
-  declinedAt?: Prisma.DateTimeNullableFilter<"GroupInvite"> | Date | string | null
+  usedAt?: Prisma.DateTimeNullableFilter<"GroupInvite"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"GroupInvite"> | Date | string
   group?: Prisma.XOR<Prisma.GroupScalarRelationFilter, Prisma.GroupWhereInput>
   invitedBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -267,8 +257,7 @@ export type GroupInviteOrderByWithAggregationInput = {
   invitedById?: Prisma.SortOrder
   status?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  acceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  declinedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  usedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.GroupInviteCountOrderByAggregateInput
   _max?: Prisma.GroupInviteMaxOrderByAggregateInput
@@ -286,8 +275,7 @@ export type GroupInviteScalarWhereWithAggregatesInput = {
   invitedById?: Prisma.StringWithAggregatesFilter<"GroupInvite"> | string
   status?: Prisma.EnumInviteStatusWithAggregatesFilter<"GroupInvite"> | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"GroupInvite"> | Date | string
-  acceptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"GroupInvite"> | Date | string | null
-  declinedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"GroupInvite"> | Date | string | null
+  usedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"GroupInvite"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"GroupInvite"> | Date | string
 }
 
@@ -297,8 +285,7 @@ export type GroupInviteCreateInput = {
   token?: string | null
   status?: $Enums.InviteStatus
   expiresAt: Date | string
-  acceptedAt?: Date | string | null
-  declinedAt?: Date | string | null
+  usedAt?: Date | string | null
   createdAt?: Date | string
   group: Prisma.GroupCreateNestedOneWithoutInvitesInput
   invitedBy: Prisma.UserCreateNestedOneWithoutInvitesInput
@@ -312,8 +299,7 @@ export type GroupInviteUncheckedCreateInput = {
   invitedById: string
   status?: $Enums.InviteStatus
   expiresAt: Date | string
-  acceptedAt?: Date | string | null
-  declinedAt?: Date | string | null
+  usedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -323,8 +309,7 @@ export type GroupInviteUpdateInput = {
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   group?: Prisma.GroupUpdateOneRequiredWithoutInvitesNestedInput
   invitedBy?: Prisma.UserUpdateOneRequiredWithoutInvitesNestedInput
@@ -338,8 +323,7 @@ export type GroupInviteUncheckedUpdateInput = {
   invitedById?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -351,8 +335,7 @@ export type GroupInviteCreateManyInput = {
   invitedById: string
   status?: $Enums.InviteStatus
   expiresAt: Date | string
-  acceptedAt?: Date | string | null
-  declinedAt?: Date | string | null
+  usedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -362,8 +345,7 @@ export type GroupInviteUpdateManyMutationInput = {
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -375,8 +357,7 @@ export type GroupInviteUncheckedUpdateManyInput = {
   invitedById?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -398,8 +379,7 @@ export type GroupInviteCountOrderByAggregateInput = {
   invitedById?: Prisma.SortOrder
   status?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  acceptedAt?: Prisma.SortOrder
-  declinedAt?: Prisma.SortOrder
+  usedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -411,8 +391,7 @@ export type GroupInviteMaxOrderByAggregateInput = {
   invitedById?: Prisma.SortOrder
   status?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  acceptedAt?: Prisma.SortOrder
-  declinedAt?: Prisma.SortOrder
+  usedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -424,8 +403,7 @@ export type GroupInviteMinOrderByAggregateInput = {
   invitedById?: Prisma.SortOrder
   status?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
-  acceptedAt?: Prisma.SortOrder
-  declinedAt?: Prisma.SortOrder
+  usedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -527,8 +505,7 @@ export type GroupInviteCreateWithoutInvitedByInput = {
   token?: string | null
   status?: $Enums.InviteStatus
   expiresAt: Date | string
-  acceptedAt?: Date | string | null
-  declinedAt?: Date | string | null
+  usedAt?: Date | string | null
   createdAt?: Date | string
   group: Prisma.GroupCreateNestedOneWithoutInvitesInput
 }
@@ -540,8 +517,7 @@ export type GroupInviteUncheckedCreateWithoutInvitedByInput = {
   groupId: string
   status?: $Enums.InviteStatus
   expiresAt: Date | string
-  acceptedAt?: Date | string | null
-  declinedAt?: Date | string | null
+  usedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -582,8 +558,7 @@ export type GroupInviteScalarWhereInput = {
   invitedById?: Prisma.StringFilter<"GroupInvite"> | string
   status?: Prisma.EnumInviteStatusFilter<"GroupInvite"> | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFilter<"GroupInvite"> | Date | string
-  acceptedAt?: Prisma.DateTimeNullableFilter<"GroupInvite"> | Date | string | null
-  declinedAt?: Prisma.DateTimeNullableFilter<"GroupInvite"> | Date | string | null
+  usedAt?: Prisma.DateTimeNullableFilter<"GroupInvite"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"GroupInvite"> | Date | string
 }
 
@@ -593,8 +568,7 @@ export type GroupInviteCreateWithoutGroupInput = {
   token?: string | null
   status?: $Enums.InviteStatus
   expiresAt: Date | string
-  acceptedAt?: Date | string | null
-  declinedAt?: Date | string | null
+  usedAt?: Date | string | null
   createdAt?: Date | string
   invitedBy: Prisma.UserCreateNestedOneWithoutInvitesInput
 }
@@ -606,8 +580,7 @@ export type GroupInviteUncheckedCreateWithoutGroupInput = {
   invitedById: string
   status?: $Enums.InviteStatus
   expiresAt: Date | string
-  acceptedAt?: Date | string | null
-  declinedAt?: Date | string | null
+  usedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -644,8 +617,7 @@ export type GroupInviteCreateManyInvitedByInput = {
   groupId: string
   status?: $Enums.InviteStatus
   expiresAt: Date | string
-  acceptedAt?: Date | string | null
-  declinedAt?: Date | string | null
+  usedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -655,8 +627,7 @@ export type GroupInviteUpdateWithoutInvitedByInput = {
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   group?: Prisma.GroupUpdateOneRequiredWithoutInvitesNestedInput
 }
@@ -668,8 +639,7 @@ export type GroupInviteUncheckedUpdateWithoutInvitedByInput = {
   groupId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -680,8 +650,7 @@ export type GroupInviteUncheckedUpdateManyWithoutInvitedByInput = {
   groupId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -692,8 +661,7 @@ export type GroupInviteCreateManyGroupInput = {
   invitedById: string
   status?: $Enums.InviteStatus
   expiresAt: Date | string
-  acceptedAt?: Date | string | null
-  declinedAt?: Date | string | null
+  usedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -703,8 +671,7 @@ export type GroupInviteUpdateWithoutGroupInput = {
   token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invitedBy?: Prisma.UserUpdateOneRequiredWithoutInvitesNestedInput
 }
@@ -716,8 +683,7 @@ export type GroupInviteUncheckedUpdateWithoutGroupInput = {
   invitedById?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -728,8 +694,7 @@ export type GroupInviteUncheckedUpdateManyWithoutGroupInput = {
   invitedById?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumInviteStatusFieldUpdateOperationsInput | $Enums.InviteStatus
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -743,8 +708,7 @@ export type GroupInviteSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   invitedById?: boolean
   status?: boolean
   expiresAt?: boolean
-  acceptedAt?: boolean
-  declinedAt?: boolean
+  usedAt?: boolean
   createdAt?: boolean
   group?: boolean | Prisma.GroupDefaultArgs<ExtArgs>
   invitedBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -758,8 +722,7 @@ export type GroupInviteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   invitedById?: boolean
   status?: boolean
   expiresAt?: boolean
-  acceptedAt?: boolean
-  declinedAt?: boolean
+  usedAt?: boolean
   createdAt?: boolean
   group?: boolean | Prisma.GroupDefaultArgs<ExtArgs>
   invitedBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -773,8 +736,7 @@ export type GroupInviteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   invitedById?: boolean
   status?: boolean
   expiresAt?: boolean
-  acceptedAt?: boolean
-  declinedAt?: boolean
+  usedAt?: boolean
   createdAt?: boolean
   group?: boolean | Prisma.GroupDefaultArgs<ExtArgs>
   invitedBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -788,12 +750,11 @@ export type GroupInviteSelectScalar = {
   invitedById?: boolean
   status?: boolean
   expiresAt?: boolean
-  acceptedAt?: boolean
-  declinedAt?: boolean
+  usedAt?: boolean
   createdAt?: boolean
 }
 
-export type GroupInviteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "token" | "groupId" | "invitedById" | "status" | "expiresAt" | "acceptedAt" | "declinedAt" | "createdAt", ExtArgs["result"]["groupInvite"]>
+export type GroupInviteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "token" | "groupId" | "invitedById" | "status" | "expiresAt" | "usedAt" | "createdAt", ExtArgs["result"]["groupInvite"]>
 export type GroupInviteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   group?: boolean | Prisma.GroupDefaultArgs<ExtArgs>
   invitedBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -821,8 +782,7 @@ export type $GroupInvitePayload<ExtArgs extends runtime.Types.Extensions.Interna
     invitedById: string
     status: $Enums.InviteStatus
     expiresAt: Date
-    acceptedAt: Date | null
-    declinedAt: Date | null
+    usedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["groupInvite"]>
   composites: {}
@@ -1256,8 +1216,7 @@ export interface GroupInviteFieldRefs {
   readonly invitedById: Prisma.FieldRef<"GroupInvite", 'String'>
   readonly status: Prisma.FieldRef<"GroupInvite", 'InviteStatus'>
   readonly expiresAt: Prisma.FieldRef<"GroupInvite", 'DateTime'>
-  readonly acceptedAt: Prisma.FieldRef<"GroupInvite", 'DateTime'>
-  readonly declinedAt: Prisma.FieldRef<"GroupInvite", 'DateTime'>
+  readonly usedAt: Prisma.FieldRef<"GroupInvite", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"GroupInvite", 'DateTime'>
 }
     

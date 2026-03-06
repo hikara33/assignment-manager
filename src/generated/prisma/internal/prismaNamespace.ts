@@ -1045,8 +1045,7 @@ export const GroupInviteScalarFieldEnum = {
   invitedById: 'invitedById',
   status: 'status',
   expiresAt: 'expiresAt',
-  acceptedAt: 'acceptedAt',
-  declinedAt: 'declinedAt',
+  usedAt: 'usedAt',
   createdAt: 'createdAt'
 } as const
 
