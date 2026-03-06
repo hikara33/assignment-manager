@@ -52,4 +52,22 @@ export class GroupController {
   ) {
     return this.inviteService.inviteUser(email, groupId, id);
   }
+
+  @Authorization()
+  @Post("invite/accept")
+  async acceptInvite(
+    @Authorized('id') id: string,
+    @Body('token') token: string
+  ) {
+    return this.inviteService.acceptInvite(token, id);
+  }
+
+  @Authorization()
+  @Post("invite/decline")
+  async declineInvite(
+    @Authorized('id') id: string,
+    @Body('token') token: string
+  ) {
+    return this.inviteService.declineInvite(token, id);
+  }
 }
