@@ -5,12 +5,14 @@ import { Authorized } from 'src/auth/decorators/authorized.decorator';
 import { GroupRoleGuard } from './guards/group-role.guard';
 import { InviteService } from './invite/invite.service';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { MemberService } from './member/member.service';
 
 @Controller('group')
 export class GroupController {
   constructor(
     private readonly groupService: GroupService,
-    private readonly inviteService: InviteService
+    private readonly inviteService: InviteService,
+    private readonly memberService: MemberService
   ) {}
 
   @Authorization()
@@ -67,5 +69,30 @@ export class GroupController {
     @Body('token') token: string
   ) {
     return this.inviteService.declineInvite(token, id);
+  }
+
+  @Authorization()
+  @Delete(":id/members")
+  async leaveGroup(
+    @Authorized('id') userId: string,
+    @Param('id') groupId: string
+  ) {
+    return await this.memberService.leaveGroup(userId, groupId);
+  }
+
+  @UseGuards(JwtGuard, GroupRoleGuard)
+  @Delete(':id/members/:memberId')
+  async removeMember(
+    @Authorized('id') userId: string,
+    @Param('id') groupId: string,
+    @Param('memberId') memberId: string
+  ) {
+    return await this.memberService.removeMember(userId, memberId, groupId);
+  }
+
+  @Authorization()
+  @Get(':id/members')
+  async getMembers(@Param('id') groupId: string) {
+    return await this.memberService.getUsersGroup(groupId);
   }
 }

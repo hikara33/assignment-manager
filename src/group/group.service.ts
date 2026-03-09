@@ -1,6 +1,5 @@
 import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { InviteService } from './invite/invite.service';
 import { Prisma } from '@prisma/client/extension';
 
 @Injectable()
@@ -74,7 +73,7 @@ export class GroupService {
     });
   }
 
-  private async getUserRole(
+  async getUserRole(
     userId: string,
     groupId: string,
     prisma: Prisma.TransactionClient | PrismaService = this.prismaService
