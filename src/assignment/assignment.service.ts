@@ -5,6 +5,7 @@ import { AssignmentStatus, Prisma } from 'src/generated/prisma/client';
 import { UpdateAssignmentRequest } from './dto/update-assignment.dto';
 import { GetAssignmentsDto } from './dto/get-assignments.dto';
 import { contains } from 'class-validator';
+import { DashboardAssignmentsDto } from './dto/dashboard.dto';
 
 @Injectable()
 export class AssignmentService {
@@ -66,6 +67,8 @@ export class AssignmentService {
 
     return await this.prismaService.assignment.findMany({
       where: {
+        userId,
+
         status,
         priority,
         subjectId,
@@ -128,6 +131,66 @@ export class AssignmentService {
       where: { id: assignmentId },
       data: { status },
     });
+  }
+
+  async getDashboard(userId: string) {
+    const now = new Date();
+
+    const [
+      total,
+      pending,
+      completed,
+      overdue,
+      urgent
+    ] = await Promise.all([
+      this.prismaService.assignment.count({
+        where: { userId },
+      }),
+
+      this.prismaService.assignment.count({
+        where: {
+          userId,
+          status: "PENDING",
+        },
+      }),
+
+      this.prismaService.assignment.count({
+        where: {
+          userId,
+          status: "COMPLETED",
+        },
+      }),
+
+      this.prismaService.assignment.count({
+        where: {
+          userId,
+          dueDay: {
+            lt: now
+          },
+          status: {
+            not: "COMPLETED",
+          },
+        },
+      }),
+
+      this.prismaService.assignment.count({
+        where: {
+          userId,
+          priority: "URGENT",
+          status: {
+            not: "COMPLETED",
+          },
+        },
+      })
+    ]);
+
+    return {
+      total,
+      pending,
+      completed,
+      overdue,
+      urgent
+    };
   }
 
   private async isOwner(userId: string, assignmentId: string): Promise<void> {

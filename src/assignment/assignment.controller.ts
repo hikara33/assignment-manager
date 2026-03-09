@@ -66,4 +66,10 @@ export class AssignmentController {
   ) {
     return await this.assignmentService.updateStatus(assignmentId, status, userId);
   }
+
+  @Authorization()
+  @Get('dashboard')
+  async getDashboard(@Authorized('id') id: string) {
+    return await this.assignmentService.getDashboard(id);
+  }
 }
