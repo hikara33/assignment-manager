@@ -73,6 +73,10 @@ model Assignment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
 
+  @@index([status])
+  @@index([priority])
+  @@index([dueDay])
+
   @@unique([title, subjectId])
   @@map("assignments")
 }

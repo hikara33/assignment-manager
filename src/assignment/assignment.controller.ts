@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { AssignmentService } from './assignment.service';
 import { CreateAssignmentRequest } from './dto/create-assignment.dto';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
 import { Authorization } from 'src/auth/decorators/authorization.decorator';
 import { UpdateAssignmentRequest } from './dto/update-assignment.dto';
 import { AssignmentStatus } from 'src/generated/prisma/enums';
+import { GetAssignmentsDto } from './dto/get-assignments.dto';
 
 @Controller('assignment')
 export class AssignmentController {
@@ -30,8 +31,11 @@ export class AssignmentController {
 
   @Authorization()
   @Get()
-  async getAll(@Authorized('id') id: string) {
-    return await this.assignmentService.getAll(id);
+  async getAll(
+    @Authorized('id') id: string,
+    @Query() dto: GetAssignmentsDto
+  ) {
+    return await this.assignmentService.getAll(id, dto);
   }
 
   @Authorization()

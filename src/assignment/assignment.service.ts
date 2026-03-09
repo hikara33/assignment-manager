@@ -3,6 +3,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAssignmentRequest } from './dto/create-assignment.dto';
 import { AssignmentStatus, Prisma } from 'src/generated/prisma/client';
 import { UpdateAssignmentRequest } from './dto/update-assignment.dto';
+import { GetAssignmentsDto } from './dto/get-assignments.dto';
+import { contains } from 'class-validator';
 
 @Injectable()
 export class AssignmentService {
@@ -11,7 +13,7 @@ export class AssignmentService {
   ) {}
 
   async create(userId: string, dto: CreateAssignmentRequest) {
-    const { title, description, dueDay, subjectId, groupId } = dto;
+    const { title, description, dueDay, subjectId, groupId, priority } = dto;
 
     const subject = await this.prismaService.subject.findUnique({
       where: { id: subjectId },
@@ -34,6 +36,7 @@ export class AssignmentService {
           userId,
           subjectId,
           groupId,
+          priority
         },
       });
     } catch(err) {
@@ -58,11 +61,30 @@ export class AssignmentService {
     return assignment;
   }
 
-  async getAll(userId: string) {
+  async getAll(userId: string, dto: GetAssignmentsDto) {
+    const { status, priority, subjectId, groupId, search } = dto;
+
     return await this.prismaService.assignment.findMany({
       where: {
-        userId,
+        status,
+        priority,
+        subjectId,
+        groupId,
+
+        title: search
+          ? {
+            contains: search,
+            mode: 'insensitive',
+          } : undefined
       },
+      orderBy: [
+        { priority: 'desc' },
+        { dueDay: 'asc' },
+      ],
+      include: {
+        subject: true,
+        group: true,
+      }
     });
   }
 
@@ -75,6 +97,7 @@ export class AssignmentService {
         title: newData.title,
         description: newData.description,
         dueDay: new Date(newData.dueDay),
+        priority: newData.priority
       },
     });
     return updatedAssignment;

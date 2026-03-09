@@ -1,4 +1,5 @@
 import { IsDateString, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { AssignmentPriority } from "src/generated/prisma/enums";
 
 export class UpdateAssignmentRequest {
   @IsString()
@@ -13,4 +14,6 @@ export class UpdateAssignmentRequest {
 
   @IsDateString({}, { message: "Дата выполнения должна быть валидной датой" })
   dueDay: string;
+
+  priority?: AssignmentPriority
 }

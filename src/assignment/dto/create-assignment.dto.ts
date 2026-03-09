@@ -1,4 +1,5 @@
 import { IsDateString, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { AssignmentPriority } from "src/generated/prisma/enums";
 
 export class CreateAssignmentRequest {
   @IsString()
@@ -20,4 +21,6 @@ export class CreateAssignmentRequest {
 
   @IsOptional()
   groupId?: string;
+
+  priority?: AssignmentPriority
 }
