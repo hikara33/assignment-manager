@@ -1,7 +1,7 @@
 import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAssignmentRequest } from './dto/create-assignment.dto';
-import { Prisma } from 'src/generated/prisma/client';
+import { AssignmentStatus, Prisma } from 'src/generated/prisma/client';
 import { UpdateAssignmentRequest } from './dto/update-assignment.dto';
 
 @Injectable()
@@ -87,6 +87,24 @@ export class AssignmentService {
       where: { id: assignmentId },
     });
     return true;
+  }
+
+  async updateStatus(
+    assignmentId: string,
+    status: AssignmentStatus,
+    userId: string
+  ) {
+    const assignment = await this.prismaService.assignment.findUnique({
+      where: { id: assignmentId },
+    });
+
+    if (!assignment) throw new NotFoundException();
+    if (assignment.userId !== userId) throw new ForbiddenException();
+
+    return await this.prismaService.assignment.update({
+      where: { id: assignmentId },
+      data: { status },
+    });
   }
 
   private async isOwner(userId: string, assignmentId: string): Promise<void> {

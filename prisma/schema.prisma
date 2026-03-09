@@ -57,7 +57,9 @@ model Assignment {
   description String?
 
   dueDay DateTime
-  status AssignmentStatus @default(PENDING)
+
+  status   AssignmentStatus   @default(PENDING)
+  priority AssignmentPriority @default(MEDIUM)
 
   userId String @map("user_id")
   user   User   @relation("user-assignemnts", fields: [userId], references: [id])
@@ -131,8 +133,8 @@ model GroupInvite {
 
   status InviteStatus @default(PENDING)
 
-  expiresAt  DateTime
-  usedAt DateTime?
+  expiresAt DateTime
+  usedAt    DateTime?
 
   createdAt DateTime @default(now())
 
@@ -151,6 +153,13 @@ enum AssignmentStatus {
   COMPLETED
   OVERDUE
   ARCHIVED
+}
+
+enum AssignmentPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
 
 enum GroupRole {

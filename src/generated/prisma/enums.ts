@@ -27,6 +27,16 @@ export const AssignmentStatus = {
 export type AssignmentStatus = (typeof AssignmentStatus)[keyof typeof AssignmentStatus]
 
 
+export const AssignmentPriority = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT'
+} as const
+
+export type AssignmentPriority = (typeof AssignmentPriority)[keyof typeof AssignmentPriority]
+
+
 export const GroupRole = {
   OWNER: 'OWNER',
   MEMBER: 'MEMBER'

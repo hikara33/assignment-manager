@@ -4,6 +4,7 @@ import { CreateAssignmentRequest } from './dto/create-assignment.dto';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
 import { Authorization } from 'src/auth/decorators/authorization.decorator';
 import { UpdateAssignmentRequest } from './dto/update-assignment.dto';
+import { AssignmentStatus } from 'src/generated/prisma/enums';
 
 @Controller('assignment')
 export class AssignmentController {
@@ -50,5 +51,15 @@ export class AssignmentController {
     @Param('id') assignmentId: string
   ) {
     return await this.assignmentService.remove(userId, assignmentId);
+  }
+
+  @Authorization()
+  @Patch(':id/status')
+  async updateStatus(
+    @Authorized('id') userId: string,
+    @Param('id') assignmentId: string,
+    @Body('status') status: AssignmentStatus
+  ) {
+    return await this.assignmentService.updateStatus(assignmentId, status, userId);
   }
 }

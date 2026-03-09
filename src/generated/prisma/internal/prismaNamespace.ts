@@ -997,6 +997,7 @@ export const AssignmentScalarFieldEnum = {
   description: 'description',
   dueDay: 'dueDay',
   status: 'status',
+  priority: 'priority',
   userId: 'userId',
   subjectId: 'subjectId',
   groupId: 'groupId',
@@ -1135,6 +1136,20 @@ export type EnumAssignmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<
  * Reference to a field of type 'AssignmentStatus[]'
  */
 export type ListEnumAssignmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AssignmentPriority'
+ */
+export type EnumAssignmentPriorityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentPriority'>
+    
+
+
+/**
+ * Reference to a field of type 'AssignmentPriority[]'
+ */
+export type ListEnumAssignmentPriorityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AssignmentPriority[]'>
     
 
 

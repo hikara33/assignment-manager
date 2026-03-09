@@ -111,6 +111,13 @@ export type EnumAssignmentStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumAssignmentStatusFilter<$PrismaModel> | $Enums.AssignmentStatus
 }
 
+export type EnumAssignmentPriorityFilter<$PrismaModel = never> = {
+  equals?: $Enums.AssignmentPriority | Prisma.EnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.AssignmentPriority[] | Prisma.ListEnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AssignmentPriority[] | Prisma.ListEnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAssignmentPriorityFilter<$PrismaModel> | $Enums.AssignmentPriority
+}
+
 export type SortOrderInput = {
   sort: Prisma.SortOrder
   nulls?: Prisma.NullsOrder
@@ -142,6 +149,16 @@ export type EnumAssignmentStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAssignmentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAssignmentStatusFilter<$PrismaModel>
+}
+
+export type EnumAssignmentPriorityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AssignmentPriority | Prisma.EnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.AssignmentPriority[] | Prisma.ListEnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AssignmentPriority[] | Prisma.ListEnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAssignmentPriorityWithAggregatesFilter<$PrismaModel> | $Enums.AssignmentPriority
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAssignmentPriorityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAssignmentPriorityFilter<$PrismaModel>
 }
 
 export type EnumGroupRoleFilter<$PrismaModel = never> = {
@@ -308,6 +325,13 @@ export type NestedEnumAssignmentStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumAssignmentStatusFilter<$PrismaModel> | $Enums.AssignmentStatus
 }
 
+export type NestedEnumAssignmentPriorityFilter<$PrismaModel = never> = {
+  equals?: $Enums.AssignmentPriority | Prisma.EnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.AssignmentPriority[] | Prisma.ListEnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AssignmentPriority[] | Prisma.ListEnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAssignmentPriorityFilter<$PrismaModel> | $Enums.AssignmentPriority
+}
+
 export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
@@ -344,6 +368,16 @@ export type NestedEnumAssignmentStatusWithAggregatesFilter<$PrismaModel = never>
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAssignmentStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAssignmentStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumAssignmentPriorityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AssignmentPriority | Prisma.EnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  in?: $Enums.AssignmentPriority[] | Prisma.ListEnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AssignmentPriority[] | Prisma.ListEnumAssignmentPriorityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAssignmentPriorityWithAggregatesFilter<$PrismaModel> | $Enums.AssignmentPriority
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAssignmentPriorityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAssignmentPriorityFilter<$PrismaModel>
 }
 
 export type NestedEnumGroupRoleFilter<$PrismaModel = never> = {

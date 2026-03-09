@@ -106,6 +106,7 @@ export const AssignmentScalarFieldEnum = {
   description: 'description',
   dueDay: 'dueDay',
   status: 'status',
+  priority: 'priority',
   userId: 'userId',
   subjectId: 'subjectId',
   groupId: 'groupId',

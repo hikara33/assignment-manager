@@ -30,6 +30,7 @@ export type AssignmentMinAggregateOutputType = {
   description: string | null
   dueDay: Date | null
   status: $Enums.AssignmentStatus | null
+  priority: $Enums.AssignmentPriority | null
   userId: string | null
   subjectId: string | null
   groupId: string | null
@@ -43,6 +44,7 @@ export type AssignmentMaxAggregateOutputType = {
   description: string | null
   dueDay: Date | null
   status: $Enums.AssignmentStatus | null
+  priority: $Enums.AssignmentPriority | null
   userId: string | null
   subjectId: string | null
   groupId: string | null
@@ -56,6 +58,7 @@ export type AssignmentCountAggregateOutputType = {
   description: number
   dueDay: number
   status: number
+  priority: number
   userId: number
   subjectId: number
   groupId: number
@@ -71,6 +74,7 @@ export type AssignmentMinAggregateInputType = {
   description?: true
   dueDay?: true
   status?: true
+  priority?: true
   userId?: true
   subjectId?: true
   groupId?: true
@@ -84,6 +88,7 @@ export type AssignmentMaxAggregateInputType = {
   description?: true
   dueDay?: true
   status?: true
+  priority?: true
   userId?: true
   subjectId?: true
   groupId?: true
@@ -97,6 +102,7 @@ export type AssignmentCountAggregateInputType = {
   description?: true
   dueDay?: true
   status?: true
+  priority?: true
   userId?: true
   subjectId?: true
   groupId?: true
@@ -183,6 +189,7 @@ export type AssignmentGroupByOutputType = {
   description: string | null
   dueDay: Date
   status: $Enums.AssignmentStatus
+  priority: $Enums.AssignmentPriority
   userId: string
   subjectId: string
   groupId: string | null
@@ -217,6 +224,7 @@ export type AssignmentWhereInput = {
   description?: Prisma.StringNullableFilter<"Assignment"> | string | null
   dueDay?: Prisma.DateTimeFilter<"Assignment"> | Date | string
   status?: Prisma.EnumAssignmentStatusFilter<"Assignment"> | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFilter<"Assignment"> | $Enums.AssignmentPriority
   userId?: Prisma.StringFilter<"Assignment"> | string
   subjectId?: Prisma.StringFilter<"Assignment"> | string
   groupId?: Prisma.StringNullableFilter<"Assignment"> | string | null
@@ -233,6 +241,7 @@ export type AssignmentOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDay?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   subjectId?: Prisma.SortOrder
   groupId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -253,6 +262,7 @@ export type AssignmentWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Assignment"> | string | null
   dueDay?: Prisma.DateTimeFilter<"Assignment"> | Date | string
   status?: Prisma.EnumAssignmentStatusFilter<"Assignment"> | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFilter<"Assignment"> | $Enums.AssignmentPriority
   userId?: Prisma.StringFilter<"Assignment"> | string
   subjectId?: Prisma.StringFilter<"Assignment"> | string
   groupId?: Prisma.StringNullableFilter<"Assignment"> | string | null
@@ -269,6 +279,7 @@ export type AssignmentOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDay?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   subjectId?: Prisma.SortOrder
   groupId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -288,6 +299,7 @@ export type AssignmentScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"Assignment"> | string | null
   dueDay?: Prisma.DateTimeWithAggregatesFilter<"Assignment"> | Date | string
   status?: Prisma.EnumAssignmentStatusWithAggregatesFilter<"Assignment"> | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityWithAggregatesFilter<"Assignment"> | $Enums.AssignmentPriority
   userId?: Prisma.StringWithAggregatesFilter<"Assignment"> | string
   subjectId?: Prisma.StringWithAggregatesFilter<"Assignment"> | string
   groupId?: Prisma.StringNullableWithAggregatesFilter<"Assignment"> | string | null
@@ -301,6 +313,7 @@ export type AssignmentCreateInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAssignmentsInput
@@ -314,6 +327,7 @@ export type AssignmentUncheckedCreateInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   userId: string
   subjectId: string
   groupId?: string | null
@@ -327,6 +341,7 @@ export type AssignmentUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAssignmentsNestedInput
@@ -340,6 +355,7 @@ export type AssignmentUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -353,6 +369,7 @@ export type AssignmentCreateManyInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   userId: string
   subjectId: string
   groupId?: string | null
@@ -366,6 +383,7 @@ export type AssignmentUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -376,6 +394,7 @@ export type AssignmentUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -404,6 +423,7 @@ export type AssignmentCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   dueDay?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   subjectId?: Prisma.SortOrder
   groupId?: Prisma.SortOrder
@@ -417,6 +437,7 @@ export type AssignmentMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   dueDay?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   subjectId?: Prisma.SortOrder
   groupId?: Prisma.SortOrder
@@ -430,6 +451,7 @@ export type AssignmentMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   dueDay?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   subjectId?: Prisma.SortOrder
   groupId?: Prisma.SortOrder
@@ -485,6 +507,10 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type EnumAssignmentStatusFieldUpdateOperationsInput = {
   set?: $Enums.AssignmentStatus
+}
+
+export type EnumAssignmentPriorityFieldUpdateOperationsInput = {
+  set?: $Enums.AssignmentPriority
 }
 
 export type AssignmentCreateNestedManyWithoutSubjectInput = {
@@ -577,6 +603,7 @@ export type AssignmentCreateWithoutUserInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   createdAt?: Date | string
   updatedAt?: Date | string
   subject: Prisma.SubjectCreateNestedOneWithoutAssignmentsInput
@@ -589,6 +616,7 @@ export type AssignmentUncheckedCreateWithoutUserInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   subjectId: string
   groupId?: string | null
   createdAt?: Date | string
@@ -630,6 +658,7 @@ export type AssignmentScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"Assignment"> | string | null
   dueDay?: Prisma.DateTimeFilter<"Assignment"> | Date | string
   status?: Prisma.EnumAssignmentStatusFilter<"Assignment"> | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFilter<"Assignment"> | $Enums.AssignmentPriority
   userId?: Prisma.StringFilter<"Assignment"> | string
   subjectId?: Prisma.StringFilter<"Assignment"> | string
   groupId?: Prisma.StringNullableFilter<"Assignment"> | string | null
@@ -643,6 +672,7 @@ export type AssignmentCreateWithoutSubjectInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAssignmentsInput
@@ -655,6 +685,7 @@ export type AssignmentUncheckedCreateWithoutSubjectInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   userId: string
   groupId?: string | null
   createdAt?: Date | string
@@ -693,6 +724,7 @@ export type AssignmentCreateWithoutGroupInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAssignmentsInput
@@ -705,6 +737,7 @@ export type AssignmentUncheckedCreateWithoutGroupInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   userId: string
   subjectId: string
   createdAt?: Date | string
@@ -743,6 +776,7 @@ export type AssignmentCreateManyUserInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   subjectId: string
   groupId?: string | null
   createdAt?: Date | string
@@ -755,6 +789,7 @@ export type AssignmentUpdateWithoutUserInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subject?: Prisma.SubjectUpdateOneRequiredWithoutAssignmentsNestedInput
@@ -767,6 +802,7 @@ export type AssignmentUncheckedUpdateWithoutUserInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -779,6 +815,7 @@ export type AssignmentUncheckedUpdateManyWithoutUserInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -791,6 +828,7 @@ export type AssignmentCreateManySubjectInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   userId: string
   groupId?: string | null
   createdAt?: Date | string
@@ -803,6 +841,7 @@ export type AssignmentUpdateWithoutSubjectInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAssignmentsNestedInput
@@ -815,6 +854,7 @@ export type AssignmentUncheckedUpdateWithoutSubjectInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -827,6 +867,7 @@ export type AssignmentUncheckedUpdateManyWithoutSubjectInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   groupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -839,6 +880,7 @@ export type AssignmentCreateManyGroupInput = {
   description?: string | null
   dueDay: Date | string
   status?: $Enums.AssignmentStatus
+  priority?: $Enums.AssignmentPriority
   userId: string
   subjectId: string
   createdAt?: Date | string
@@ -851,6 +893,7 @@ export type AssignmentUpdateWithoutGroupInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAssignmentsNestedInput
@@ -863,6 +906,7 @@ export type AssignmentUncheckedUpdateWithoutGroupInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -875,6 +919,7 @@ export type AssignmentUncheckedUpdateManyWithoutGroupInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDay?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumAssignmentStatusFieldUpdateOperationsInput | $Enums.AssignmentStatus
+  priority?: Prisma.EnumAssignmentPriorityFieldUpdateOperationsInput | $Enums.AssignmentPriority
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   subjectId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -889,6 +934,7 @@ export type AssignmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   description?: boolean
   dueDay?: boolean
   status?: boolean
+  priority?: boolean
   userId?: boolean
   subjectId?: boolean
   groupId?: boolean
@@ -905,6 +951,7 @@ export type AssignmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   description?: boolean
   dueDay?: boolean
   status?: boolean
+  priority?: boolean
   userId?: boolean
   subjectId?: boolean
   groupId?: boolean
@@ -921,6 +968,7 @@ export type AssignmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   description?: boolean
   dueDay?: boolean
   status?: boolean
+  priority?: boolean
   userId?: boolean
   subjectId?: boolean
   groupId?: boolean
@@ -937,6 +985,7 @@ export type AssignmentSelectScalar = {
   description?: boolean
   dueDay?: boolean
   status?: boolean
+  priority?: boolean
   userId?: boolean
   subjectId?: boolean
   groupId?: boolean
@@ -944,7 +993,7 @@ export type AssignmentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "dueDay" | "status" | "userId" | "subjectId" | "groupId" | "createdAt" | "updatedAt", ExtArgs["result"]["assignment"]>
+export type AssignmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "dueDay" | "status" | "priority" | "userId" | "subjectId" | "groupId" | "createdAt" | "updatedAt", ExtArgs["result"]["assignment"]>
 export type AssignmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   subject?: boolean | Prisma.SubjectDefaultArgs<ExtArgs>
@@ -974,6 +1023,7 @@ export type $AssignmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     description: string | null
     dueDay: Date
     status: $Enums.AssignmentStatus
+    priority: $Enums.AssignmentPriority
     userId: string
     subjectId: string
     groupId: string | null
@@ -1410,6 +1460,7 @@ export interface AssignmentFieldRefs {
   readonly description: Prisma.FieldRef<"Assignment", 'String'>
   readonly dueDay: Prisma.FieldRef<"Assignment", 'DateTime'>
   readonly status: Prisma.FieldRef<"Assignment", 'AssignmentStatus'>
+  readonly priority: Prisma.FieldRef<"Assignment", 'AssignmentPriority'>
   readonly userId: Prisma.FieldRef<"Assignment", 'String'>
   readonly subjectId: Prisma.FieldRef<"Assignment", 'String'>
   readonly groupId: Prisma.FieldRef<"Assignment", 'String'>
