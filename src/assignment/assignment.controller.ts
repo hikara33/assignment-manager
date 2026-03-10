@@ -82,4 +82,10 @@ export class AssignmentController {
   async getPrioritized(@Authorized('id') id: string) {
     return await this.priorityResolver.getPrioritizedAssignments(id);
   }
+
+  @Authorization()
+  @Get('conflicts')
+  async getConflicts(@Authorized('id') id: string) {
+    return await this.assignmentService.detectConflicts(id);
+  }
 }

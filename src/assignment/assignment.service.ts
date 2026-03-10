@@ -4,13 +4,15 @@ import { CreateAssignmentRequest } from './dto/create-assignment.dto';
 import { AssignmentStatus, Prisma } from 'src/generated/prisma/client';
 import { UpdateAssignmentRequest } from './dto/update-assignment.dto';
 import { GetAssignmentsDto } from './dto/get-assignments.dto';
-import { contains } from 'class-validator';
-import { DashboardAssignmentsDto } from './dto/dashboard.dto';
+import { ConflictDetectorService } from './services/conflict-detector.service';
+import { WorkloadService } from './services/workload.service';
 
 @Injectable()
 export class AssignmentService {
   constructor(
-    private readonly prismaService: PrismaService
+    private readonly prismaService: PrismaService,
+    private readonly conflictDetector: ConflictDetectorService,
+    private readonly workload: WorkloadService
   ) {}
 
   async create(userId: string, dto: CreateAssignmentRequest) {
@@ -137,12 +139,15 @@ export class AssignmentService {
     const now = new Date();
 
     const [
+      workload,
       total,
       pending,
       completed,
       overdue,
       urgent
     ] = await Promise.all([
+      this.workload.getWorkload(userId),
+
       this.prismaService.assignment.count({
         where: { userId },
       }),
@@ -185,12 +190,24 @@ export class AssignmentService {
     ]);
 
     return {
+      workload,
       total,
       pending,
       completed,
       overdue,
       urgent
     };
+  }
+
+  async detectConflicts(userId: string) {
+    const tasks = await this.prismaService.assignment.findMany({
+      where: {
+        userId,
+        status: "PENDING",
+      },
+    });
+
+    return this.conflictDetector.detect(tasks);
   }
 
   private async isOwner(userId: string, assignmentId: string): Promise<void> {
