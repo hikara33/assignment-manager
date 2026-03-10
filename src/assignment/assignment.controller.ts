@@ -6,10 +6,14 @@ import { Authorization } from 'src/auth/decorators/authorization.decorator';
 import { UpdateAssignmentRequest } from './dto/update-assignment.dto';
 import { AssignmentStatus } from 'src/generated/prisma/enums';
 import { GetAssignmentsDto } from './dto/get-assignments.dto';
+import { PriorityResolverService } from './services/priority-resolver.service';
 
 @Controller('assignment')
 export class AssignmentController {
-  constructor(private readonly assignmentService: AssignmentService) {}
+  constructor(
+    private readonly assignmentService: AssignmentService,
+    private readonly priorityResolver: PriorityResolverService
+  ) {}
 
   @Authorization()
   @Post('create')
@@ -71,5 +75,11 @@ export class AssignmentController {
   @Get('dashboard')
   async getDashboard(@Authorized('id') id: string) {
     return await this.assignmentService.getDashboard(id);
+  }
+
+  @Authorization()
+  @Get('prioritized')
+  async getPrioritized(@Authorized('id') id: string) {
+    return await this.priorityResolver.getPrioritizedAssignments(id);
   }
 }
