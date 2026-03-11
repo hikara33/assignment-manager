@@ -88,4 +88,10 @@ export class AssignmentController {
   async getConflicts(@Authorized('id') id: string) {
     return await this.assignmentService.detectConflicts(id);
   }
+
+  @Authorization()
+  @Get('reschedule-suggestions')
+  async getRescheduleSuggestions(@Authorized('id') id: string) {
+    return await this.assignmentService.getRescheduleSuggestions(id);
+  }
 }

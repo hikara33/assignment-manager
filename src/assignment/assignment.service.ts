@@ -6,13 +6,15 @@ import { UpdateAssignmentRequest } from './dto/update-assignment.dto';
 import { GetAssignmentsDto } from './dto/get-assignments.dto';
 import { ConflictDetectorService } from './services/conflict-detector.service';
 import { WorkloadService } from './services/workload.service';
+import { SchedulerService } from './services/sheduler.service';
 
 @Injectable()
 export class AssignmentService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly conflictDetector: ConflictDetectorService,
-    private readonly workload: WorkloadService
+    private readonly workload: WorkloadService,
+    private readonly scheduler: SchedulerService
   ) {}
 
   async create(userId: string, dto: CreateAssignmentRequest) {
@@ -208,6 +210,14 @@ export class AssignmentService {
     });
 
     return this.conflictDetector.detect(tasks);
+  }
+
+  async getRescheduleSuggestions(userId: string) {
+    const tasks = await this.prismaService.assignment.findMany({
+      where: { userId, status: "PENDING" },
+    });
+
+    return this.scheduler.suggestReschedule(tasks);
   }
 
   private async isOwner(userId: string, assignmentId: string): Promise<void> {
