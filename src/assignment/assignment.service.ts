@@ -7,6 +7,7 @@ import { GetAssignmentsDto } from './dto/get-assignments.dto';
 import { ConflictDetectorService } from './services/conflict-detector.service';
 import { WorkloadService } from './services/workload.service';
 import { SchedulerService } from './services/sheduler.service';
+import { AssignmentQueryBuilder } from './builders/assignment-query.builder';
 
 @Injectable()
 export class AssignmentService {
@@ -67,32 +68,36 @@ export class AssignmentService {
   }
 
   async getAll(userId: string, dto: GetAssignmentsDto) {
-    const { status, priority, subjectId, groupId, search } = dto;
+    const where = AssignmentQueryBuilder.buildWhere(userId, dto);
 
-    return await this.prismaService.assignment.findMany({
-      where: {
-        userId,
+    const { skip, take } = AssignmentQueryBuilder.pagination(dto.page, dto.limit);
 
-        status,
-        priority,
-        subjectId,
-        groupId,
+    const [assignments, total] = await Promise.all([
+      this.prismaService.assignment.findMany({
+        where,
+        orderBy: [
+          { priority: 'desc' },
+          { dueDay: 'asc' }
+        ],
+        include: {
+          subject: true,
+          group: true
+        },
+        skip,
+        take
+      }),
 
-        title: search
-          ? {
-            contains: search,
-            mode: 'insensitive',
-          } : undefined
-      },
-      orderBy: [
-        { priority: 'desc' },
-        { dueDay: 'asc' },
-      ],
-      include: {
-        subject: true,
-        group: true,
+      this.prismaService.assignment.count({ where })
+    ]);
+
+    return {
+      data: assignments,
+      meta: {
+        total,
+        page: dto.page ?? 1,
+        lastPage: Math.ceil(total / (dto.page ?? 10))
       }
-    });
+    };
   }
 
   async update(userId: string, assignmentId: string, newData: UpdateAssignmentRequest) {
