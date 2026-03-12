@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AssignmentModule } from './assignment/assignment.module';
 import { SubjectModule } from './subject/subject.module';
 import { GroupModule } from './group/group.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { GroupModule } from './group/group.module';
     AssignmentModule,
     SubjectModule,
     GroupModule,
+    ScheduleModule.forRoot()
   ],
   controllers: [AppController],
   providers: [AppService],

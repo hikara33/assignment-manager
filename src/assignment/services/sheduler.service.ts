@@ -20,7 +20,7 @@ export class SchedulerService {
     const suggestions: SuggestReschedule[] = [];
 
     for (const [date, tasks] of Object.entries(map)) {
-      if (tasks.length > 4) {
+      if (tasks.length > 3) {
         const overflow = tasks.slice(3);
 
         overflow.forEach((task, index) => {
