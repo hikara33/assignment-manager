@@ -45,7 +45,7 @@ export class EmailService {
       `
     });
 
-    this.logger.log(`Sent reminder to ${email}`);
+    this.logger.log(`Sent invite to ${email}`);
   }
 
   async sendAssignmentReminder(email: string, taskTitle: string, dueDay: Date) {
