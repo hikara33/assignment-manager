@@ -18,6 +18,7 @@ describe("AutomationService (cron)", () => {
   let service: AutomationService;
   let prisma: PrismaService;
   let email: EmailService;
+  let moduleRef: TestingModule;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,9 +32,14 @@ describe("AutomationService (cron)", () => {
       ]
     }).compile();
 
+    moduleRef = module;
     service = module.get<AutomationService>(AutomationService);
     prisma = module.get<PrismaService>(PrismaService);
     email = module.get<EmailService>(EmailService);
+  });
+
+  afterEach(async () => {
+    await moduleRef?.close?.();
   });
 
   it("should mark overdue assignments", async () => {
