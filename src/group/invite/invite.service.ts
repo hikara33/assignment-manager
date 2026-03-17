@@ -25,7 +25,7 @@ export class InviteService {
     const token = this.generateToken(email, groupId, invitedById);
     const hashToken = this.hashToken(token);
 
-    await this.prismaService.$transaction(async (prisma) => {
+    const result = await this.prismaService.$transaction(async (prisma) => {
       const group = await prisma.group.findUnique({
         where: { id: groupId },
       });
@@ -87,6 +87,7 @@ export class InviteService {
     });
     
     await this.emailService.sendGroupInvite(email, token);
+    return result;
   }
 
   async acceptInvite(token: string, userId: string) {
