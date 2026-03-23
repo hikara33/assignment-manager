@@ -1,9 +1,9 @@
-import { PrismaService } from "src/prisma/prisma.service";
-import { AutomationService } from "./automation.service";
-import { EmailService } from "src/group/email/email.service";
-import { Test, TestingModule } from "@nestjs/testing";
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AutomationService } from './automation.service';
+import { EmailService } from 'src/group/email/email.service';
+import { Test, TestingModule } from '@nestjs/testing';
 
-jest.mock("src/prisma/prisma.service", () => {
+jest.mock('src/prisma/prisma.service', () => {
   return {
     PrismaService: jest.fn().mockImplementation(() => ({
       assignment: { updateMany: jest.fn(), findMany: jest.fn() },
@@ -14,7 +14,7 @@ jest.mock("src/prisma/prisma.service", () => {
   };
 });
 
-describe("AutomationService (cron)", () => {
+describe('AutomationService (cron)', () => {
   let service: AutomationService;
   let prisma: PrismaService;
   let email: EmailService;
@@ -27,9 +27,9 @@ describe("AutomationService (cron)", () => {
         PrismaService,
         {
           provide: EmailService,
-          useValue: { sendAssignmentReminder: jest.fn() }
-        }
-      ]
+          useValue: { sendAssignmentReminder: jest.fn() },
+        },
+      ],
     }).compile();
 
     moduleRef = module;
@@ -42,20 +42,22 @@ describe("AutomationService (cron)", () => {
     await moduleRef?.close?.();
   });
 
-  it("should mark overdue assignments", async () => {
+  it('should mark overdue assignments', async () => {
     (prisma.assignment.updateMany as jest.Mock).mockResolvedValue({ count: 2 });
 
     await service.markOverdueAssignments();
 
-    expect(prisma.assignment.updateMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({ status: { not: 'COMPLETED' }}),
-      data: { status: "OVERDUE" }
-    }));
+    expect(prisma.assignment.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: { not: 'COMPLETED' } }),
+        data: { status: 'OVERDUE' },
+      }),
+    );
   });
 
-  it("should send reminders for assignments due in 3 days", async () => {
+  it('should send reminders for assignments due in 3 days', async () => {
     const mockTasks = [
-      { title: "Task 1", dueDay: new Date(), user: { email: "test@test.com" }}
+      { title: 'Task 1', dueDay: new Date(), user: { email: 'test@test.com' } },
     ];
     (prisma.assignment.findMany as jest.Mock).mockResolvedValue(mockTasks);
 
@@ -65,13 +67,17 @@ describe("AutomationService (cron)", () => {
     expect(email.sendAssignmentReminder).toHaveBeenCalledWith(
       'test@test.com',
       'Task 1',
-      mockTasks[0].dueDay
+      mockTasks[0].dueDay,
     );
   });
 
-  it("should clean expired tokens and update invites", async () => {
-    (prisma.refreshToken.deleteMany as jest.Mock).mockResolvedValue({ count: 3 });
-    (prisma.groupInvite.updateMany as jest.Mock).mockResolvedValue({ count: 5 });
+  it('should clean expired tokens and update invites', async () => {
+    (prisma.refreshToken.deleteMany as jest.Mock).mockResolvedValue({
+      count: 3,
+    });
+    (prisma.groupInvite.updateMany as jest.Mock).mockResolvedValue({
+      count: 5,
+    });
 
     await service.cleanExpiredTokensAndInvites();
 

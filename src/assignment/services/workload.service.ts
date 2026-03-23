@@ -1,12 +1,10 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service";
-import { WorkloadResult } from "../interfaces/workload.interface";
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { WorkloadResult } from '../interfaces/workload.interface';
 
 @Injectable()
 export class WorkloadService {
-  constructor(
-    private readonly prisma: PrismaService
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
   async getWorkload(userId: string) {
     const now = new Date();
 
@@ -22,9 +20,9 @@ export class WorkloadService {
           userId,
           dueDay: {
             gte: now,
-            lt: tomorrow
-          }
-        }
+            lt: tomorrow,
+          },
+        },
       }),
 
       this.prisma.assignment.count({
@@ -32,9 +30,9 @@ export class WorkloadService {
           userId,
           dueDay: {
             gte: tomorrow,
-            lt: week
-          }
-        }
+            lt: week,
+          },
+        },
       }),
 
       this.prisma.assignment.count({
@@ -42,16 +40,16 @@ export class WorkloadService {
           userId,
           dueDay: {
             gte: now,
-            lt: week
-          }
-        }
-      })
+            lt: week,
+          },
+        },
+      }),
     ]);
 
     return {
       today,
       tomorrow: tomorrowTasks,
-      week: weekTasks
+      week: weekTasks,
     };
   }
 
@@ -59,15 +57,11 @@ export class WorkloadService {
     const suggestions: string[] = [];
 
     if (workload.tomorrow >= 4) {
-      suggestions.push(
-        "You have many tasks tomorrow. Consider starting today"
-      );
+      suggestions.push('You have many tasks tomorrow. Consider starting today');
     }
 
     if (workload.today === 0) {
-      suggestions.push(
-        "No tasks today. Good time to start upcoming work ^^"
-      );
+      suggestions.push('No tasks today. Good time to start upcoming work ^^');
     }
 
     return suggestions;

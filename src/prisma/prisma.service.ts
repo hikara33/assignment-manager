@@ -7,26 +7,27 @@ import { PrismaPg } from '@prisma/adapter-pg';
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
-  {
-    private readonly pool: Pool;
+{
+  private readonly pool: Pool;
 
-    constructor() {
-      const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-      const adapter = new PrismaPg(pool);
+  constructor() {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    const adapter = new PrismaPg(pool);
 
-      super({
-        adapter,
-      });
+    super({
+      adapter,
+    });
 
-      this.pool = pool;
-    }
-
-    async onModuleInit() {
-      await this.$connect();
-    }
-
-    async onModuleDestroy() {
-      await this.$disconnect();
-      await this.pool.end();
-    }
+    this.pool = pool;
   }
+
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    console.log('Shutting down Prisma...');
+    await this.$disconnect();
+    await this.pool.end();
+  }
+}

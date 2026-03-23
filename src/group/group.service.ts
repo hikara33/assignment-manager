@@ -1,18 +1,20 @@
-import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
+import { Prisma } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client/extension';
 
 @Injectable()
 export class GroupService {
-  constructor(
-    private readonly prismaService: PrismaService
-  ) {}
-  
+  constructor(private readonly prismaService: PrismaService) {}
+
   async createGroup(userId: string, name: string) {
     const existing = await this.prismaService.group.findUnique({
       where: { name },
     });
-    if (existing) throw new ConflictException("Группа уже создана");
+    if (existing) throw new ConflictException('Группа уже создана');
 
     return await this.prismaService.$transaction(async (prisma) => {
       const group = await prisma.group.create({
@@ -23,7 +25,7 @@ export class GroupService {
         data: {
           userId,
           groupId: group.id,
-          role: "OWNER",
+          role: 'OWNER',
         },
       });
 
@@ -34,7 +36,8 @@ export class GroupService {
   async delete(userId: string, groupId: string) {
     const role = await this.getUserRole(userId, groupId);
 
-    if (role !== "OWNER") throw new ForbiddenException("У вас недостаточно прав");
+    if (role !== 'OWNER')
+      throw new ForbiddenException('У вас недостаточно прав');
 
     await this.prismaService.group.delete({
       where: { id: groupId },
@@ -44,11 +47,12 @@ export class GroupService {
   async shareOwnership(
     currentOwner: string,
     newOwner: string,
-    groupId: string
+    groupId: string,
   ) {
     return await this.prismaService.$transaction(async (prisma) => {
       const current = await this.getUserRole(currentOwner, groupId);
-      if (current !== "OWNER") throw new ForbiddenException("У вас недостаточно прав");
+      if (current !== 'OWNER')
+        throw new ForbiddenException('У вас недостаточно прав');
 
       const newOwnerMember = await prisma.userGroup.findUnique({
         where: {
@@ -59,7 +63,8 @@ export class GroupService {
         },
       });
 
-      if (!newOwnerMember) throw new ForbiddenException("Пользователь не состоит в группе");
+      if (!newOwnerMember)
+        throw new ForbiddenException('Пользователь не состоит в группе');
 
       await prisma.userGroup.update({
         where: {
@@ -68,7 +73,7 @@ export class GroupService {
             groupId,
           },
         },
-        data: { role: "OWNER" },
+        data: { role: 'OWNER' },
       });
     });
   }
@@ -76,7 +81,7 @@ export class GroupService {
   async getUserRole(
     userId: string,
     groupId: string,
-    prisma: Prisma.TransactionClient | PrismaService = this.prismaService
+    prisma: Prisma.TransactionClient | PrismaService = this.prismaService,
   ) {
     const userInGroup = await prisma.userGroup.findUnique({
       where: {
@@ -87,7 +92,8 @@ export class GroupService {
       },
     });
 
-    if (!userInGroup) throw new ForbiddenException("Пользователь не состоит в группе");
+    if (!userInGroup)
+      throw new ForbiddenException('Пользователь не состоит в группе');
 
     return userInGroup.role;
   }

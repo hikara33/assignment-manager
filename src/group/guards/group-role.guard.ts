@@ -1,6 +1,11 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service";
-import { AuthRequest } from "../interfaces/request.interface";
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthRequest } from '../interfaces/request.interface';
 
 @Injectable()
 export class GroupRoleGuard implements CanActivate {
@@ -20,8 +25,8 @@ export class GroupRoleGuard implements CanActivate {
       },
     });
 
-    if (!membership || membership.role !== "OWNER") {
-      throw new ForbiddenException("У вас недостаточно прав");
+    if (!membership || membership.role !== 'OWNER') {
+      throw new ForbiddenException('У вас недостаточно прав');
     }
 
     return true;

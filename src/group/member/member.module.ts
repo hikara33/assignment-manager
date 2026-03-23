@@ -5,6 +5,6 @@ import { GroupModule } from '../group.module';
 @Module({
   providers: [MemberService],
   imports: [forwardRef(() => GroupModule)],
-  exports: [MemberService]
+  exports: [MemberService],
 })
 export class MemberModule {}

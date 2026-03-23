@@ -14,13 +14,12 @@ import { ScheduleModule } from '@nestjs/schedule';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    PrismaModule,
     AuthModule,
     PrismaModule,
     AssignmentModule,
     SubjectModule,
     GroupModule,
-    ScheduleModule.forRoot()
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

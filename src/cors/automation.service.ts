@@ -1,7 +1,7 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { Cron, CronExpression } from "@nestjs/schedule";
-import { EmailService } from "src/group/email/email.service";
-import { PrismaService } from "src/prisma/prisma.service";
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { EmailService } from 'src/group/email/email.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AutomationService {
@@ -9,7 +9,7 @@ export class AutomationService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -19,9 +19,9 @@ export class AutomationService {
     const result = await this.prisma.assignment.updateMany({
       where: {
         dueDay: { lt: now },
-        status: { not: "COMPLETED" },
+        status: { not: 'COMPLETED' },
       },
-      data: { status: "OVERDUE" }
+      data: { status: 'OVERDUE' },
     });
 
     this.logger.log(`Marked ${result.count} assignments as OVERDUE`);
@@ -43,21 +43,21 @@ export class AutomationService {
       where: {
         dueDay: {
           gte: start,
-          lt: end
+          lt: end,
         },
-        status: "PENDING"
+        status: 'PENDING',
       },
-      include: { user: { select: { email: true }}},
+      include: { user: { select: { email: true } } },
     });
 
     await Promise.all(
-      taskDue.map(task => 
+      taskDue.map((task) =>
         this.emailService.sendAssignmentReminder(
           task.user.email,
           task.title,
-          task.dueDay
-        )
-      )
+          task.dueDay,
+        ),
+      ),
     );
 
     this.logger.log(`Sent ${taskDue.length} deadline reminders`);
@@ -68,16 +68,16 @@ export class AutomationService {
     const now = new Date();
 
     const deletedTokens = await this.prisma.refreshToken.deleteMany({
-      where: { expiresAt: { lt: now }},
+      where: { expiresAt: { lt: now } },
     });
 
     const expiredInvites = await this.prisma.groupInvite.updateMany({
-      where: { status: "PENDING", expiresAt: { lt: now }},
-      data: { status: "EXPIRED" }
+      where: { status: 'PENDING', expiresAt: { lt: now } },
+      data: { status: 'EXPIRED' },
     });
 
     this.logger.log(
-      `Cleaned ${deletedTokens.count} expired tokens and updated ${expiredInvites.count} invites`
+      `Cleaned ${deletedTokens.count} expired tokens and updated ${expiredInvites.count} invites`,
     );
   }
 }

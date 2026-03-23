@@ -1,8 +1,11 @@
-import { Prisma } from "src/generated/prisma/client";
-import { GetAssignmentsDto } from "../dto/get-assignments.dto";
+import { Prisma } from 'src/generated/prisma/client';
+import { GetAssignmentsDto } from '../dto/get-assignments.dto';
 
 export class AssignmentQueryBuilder {
-  static buildWhere(userId: string, dto: GetAssignmentsDto): Prisma.AssignmentWhereInput {
+  static buildWhere(
+    userId: string,
+    dto: GetAssignmentsDto,
+  ): Prisma.AssignmentWhereInput {
     const { status, priority, subjectId, groupId, search } = dto;
 
     return {
@@ -16,9 +19,9 @@ export class AssignmentQueryBuilder {
       ...(search && {
         title: {
           contains: search,
-          mode: "insensitive"
-        }
-      })
+          mode: 'insensitive',
+        },
+      }),
     };
   }
 
@@ -27,7 +30,7 @@ export class AssignmentQueryBuilder {
 
     return {
       skip: (page - 1) * safeLimit,
-      take: safeLimit
+      take: safeLimit,
     };
   }
 }

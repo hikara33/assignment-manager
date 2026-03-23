@@ -13,9 +13,9 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
 
   constructor(private readonly configService: ConfigService) {
-    this.SMTP_HOST = configService.getOrThrow<string>("SMTP_HOST");
-    this.SMTP_USER = configService.getOrThrow<string>("SMTP_USER");
-    this.SMTP_PASS = configService.getOrThrow<string>("SMTP_PASS");
+    this.SMTP_HOST = configService.getOrThrow<string>('SMTP_HOST');
+    this.SMTP_USER = configService.getOrThrow<string>('SMTP_USER');
+    this.SMTP_PASS = configService.getOrThrow<string>('SMTP_PASS');
 
     this.FROM = `"Assignment Manager" <${this.SMTP_USER}>`;
 
@@ -36,13 +36,13 @@ export class EmailService {
     await this.transporter.sendMail({
       from: this.FROM,
       to: email,
-      subject: "You are invited to join a group",
+      subject: 'You are invited to join a group',
       html: `
         <h2>Group Invitation</h2>
         <p>You have been invited to join a group.</p>
         <a href="${link}">Accept Invite</a>
         <p>This link expires in 24 hours.</p>
-      `
+      `,
     });
 
     this.logger.log(`Sent invite to ${email}`);
@@ -52,12 +52,12 @@ export class EmailService {
     await this.transporter.sendMail({
       from: this.FROM,
       to: email,
-      subject: "Assignment deadline reminder",
+      subject: 'Assignment deadline reminder',
       html: `
         <h2>Reminder</h2>
         <p>Your assignment <b>${taskTitle}</b> is due soon.</p>
         <p>Deadline: ${dueDay.toDateString()}</p>
-      `
+      `,
     });
 
     this.logger.log(`Sent reminder to ${email}`);

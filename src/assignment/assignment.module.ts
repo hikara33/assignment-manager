@@ -13,7 +13,7 @@ import { SchedulerService } from './services/sheduler.service';
     PriorityResolverService,
     ConflictDetectorService,
     WorkloadService,
-    SchedulerService
-  ]
+    SchedulerService,
+  ],
 })
 export class AssignmentModule {}

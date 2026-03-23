@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
-import { Assignment } from "src/generated/prisma/client";
-import { ConflictResult } from "../interfaces/conflict.interface";
+import { Injectable } from '@nestjs/common';
+import { Assignment } from 'src/generated/prisma/client';
+import { ConflictResult } from '../interfaces/conflict.interface';
 
 @Injectable()
 export class ConflictDetectorService {
@@ -18,11 +18,11 @@ export class ConflictDetectorService {
     }
 
     return Object.entries(map)
-      .filter(([_, tasks]) => tasks.length >= 3)
+      .filter(([, tasks]) => tasks.length >= 3)
       .map(([date, tasks]) => ({
         date,
         count: tasks.length,
-        tasks
+        tasks,
       }));
   }
 }

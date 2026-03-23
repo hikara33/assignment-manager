@@ -1,4 +1,9 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
@@ -10,7 +15,7 @@ import { GroupInvite, Prisma, User } from 'src/generated/prisma/client';
 
 @Injectable()
 export class InviteService {
-  private readonly JWT_INVITE_TTL: SignOptions["expiresIn"];
+  private readonly JWT_INVITE_TTL: SignOptions['expiresIn'];
 
   constructor(
     private readonly prismaService: PrismaService,
@@ -18,7 +23,8 @@ export class InviteService {
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
   ) {
-    this.JWT_INVITE_TTL = configService.getOrThrow<SignOptions["expiresIn"]>("JWT_INVITE_TTL");
+    this.JWT_INVITE_TTL =
+      configService.getOrThrow<SignOptions['expiresIn']>('JWT_INVITE_TTL');
   }
 
   async inviteUser(email: string, groupId: string, invitedById: string) {
@@ -30,7 +36,7 @@ export class InviteService {
         where: { id: groupId },
       });
 
-      if (!group) throw new NotFoundException("Группа не найдена");
+      if (!group) throw new NotFoundException('Группа не найдена');
 
       const inviterMembership = await prisma.userGroup.findUnique({
         where: {
@@ -41,8 +47,10 @@ export class InviteService {
         },
       });
 
-      if (!inviterMembership || inviterMembership.role !== "OWNER") {
-        throw new ConflictException("Отправлять приглашение может только владелец группы");
+      if (!inviterMembership || inviterMembership.role !== 'OWNER') {
+        throw new ConflictException(
+          'Отправлять приглашение может только владелец группы',
+        );
       }
 
       const existUser = await prisma.user.findUnique({
@@ -59,19 +67,21 @@ export class InviteService {
           },
         });
 
-        if (membership) throw new ConflictException("Пользователь уже состоит в группе");
+        if (membership)
+          throw new ConflictException('Пользователь уже состоит в группе');
       }
 
       const existingInvite = await prisma.groupInvite.findFirst({
         where: {
           email,
           groupId,
-          status: "PENDING",
+          status: 'PENDING',
           expiresAt: { gt: new Date() },
         },
       });
 
-      if (existingInvite) throw new ConflictException("Приглашение уже отправлено");
+      if (existingInvite)
+        throw new ConflictException('Приглашение уже отправлено');
 
       const invite = await prisma.groupInvite.create({
         data: {
@@ -79,13 +89,13 @@ export class InviteService {
           token: hashToken,
           groupId,
           invitedById,
-          status: "PENDING",
+          status: 'PENDING',
           expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
       return invite;
     });
-    
+
     await this.emailService.sendGroupInvite(email, token);
     return result;
   }
@@ -109,7 +119,8 @@ export class InviteService {
           },
         },
       });
-      if (existingMembership) throw new ConflictException("Пользователь уже состоит в группе");
+      if (existingMembership)
+        throw new ConflictException('Пользователь уже состоит в группе');
 
       await prisma.userGroup.create({
         data: {
@@ -119,15 +130,15 @@ export class InviteService {
       });
       await prisma.groupInvite.update({
         where: { id: invite.id },
-        data: { status: "ACCEPTED", usedAt: new Date() },
+        data: { status: 'ACCEPTED', usedAt: new Date() },
       });
 
-      return { message: "Вы успешно присоединились к группе" };
+      return { message: 'Вы успешно присоединились к группе' };
     });
   }
 
   async declineInvite(token: string, userId: string) {
-    const payload: InvitePayload = await this.verifyToken(token);
+    await this.verifyToken(token);
 
     return this.prismaService.$transaction(async (prisma) => {
       const invite = await this.getInviteByToken(token, prisma);
@@ -139,10 +150,10 @@ export class InviteService {
 
       await prisma.groupInvite.update({
         where: { id: invite.id },
-        data: { status: "DECLINED", usedAt: new Date() },
+        data: { status: 'DECLINED', usedAt: new Date() },
       });
 
-      return { message: "Вы отклонили приглашение" };
+      return { message: 'Вы отклонили приглашение' };
     });
   }
 
@@ -151,7 +162,7 @@ export class InviteService {
       email,
       groupId,
       invitedById,
-      type: "GROUP_INVITE",
+      type: 'GROUP_INVITE',
     };
 
     const token = this.jwtService.sign(payload, {
@@ -162,29 +173,26 @@ export class InviteService {
   }
 
   private hashToken(token: string) {
-    return crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 
   private async verifyToken(token: string): Promise<InvitePayload> {
     try {
       const payload: InvitePayload = await this.jwtService.verifyAsync(token);
 
-      if (payload.type !== "GROUP_INVITE") {
-        throw new ForbiddenException("Невалидный токен");
+      if (payload.type !== 'GROUP_INVITE') {
+        throw new ForbiddenException('Невалидный токен');
       }
 
       return payload;
     } catch {
-      throw new ForbiddenException("Инвайт истек или невалиден");
+      throw new ForbiddenException('Инвайт истек или невалиден');
     }
   }
 
   private async getInviteByToken(
     token: string,
-    prisma: Prisma.TransactionClient | PrismaService = this.prismaService
+    prisma: Prisma.TransactionClient | PrismaService = this.prismaService,
   ) {
     const tokenHash = this.hashToken(token);
 
@@ -192,46 +200,46 @@ export class InviteService {
       where: { token: tokenHash },
     });
     if (!invite) {
-      throw new NotFoundException("Приглашение не найдено");
+      throw new NotFoundException('Приглашение не найдено');
     }
 
     return invite;
   }
 
   private ensureInvitePending(invite: GroupInvite) {
-    if (invite.status !== "PENDING") {
-      throw new ConflictException("Приглашение уже обработано");
+    if (invite.status !== 'PENDING') {
+      throw new ConflictException('Приглашение уже обработано');
     }
   }
 
   private async ensureInviteNotExpired(
     invite: GroupInvite,
-    prisma: Prisma.TransactionClient | PrismaService = this.prismaService
+    prisma: Prisma.TransactionClient | PrismaService = this.prismaService,
   ) {
     if (invite.expiresAt < new Date()) {
       await prisma.groupInvite.update({
         where: { id: invite.id },
-        data: { status: "EXPIRED" },
+        data: { status: 'EXPIRED' },
       });
 
-      throw new ForbiddenException("Приглашение истекло");
+      throw new ForbiddenException('Приглашение истекло');
     }
   }
 
   private ensureInviteForUser(userEmail: string, inviteEmail: string) {
     if (userEmail !== inviteEmail) {
-      throw new ForbiddenException("Это приглашение не для вас");
+      throw new ForbiddenException('Это приглашение не для вас');
     }
   }
 
   private async getUserById(
     userId: string,
-    prisma: Prisma.TransactionClient | PrismaService = this.prismaService
+    prisma: Prisma.TransactionClient | PrismaService = this.prismaService,
   ): Promise<User> {
     const user = await prisma.user.findUnique({
-        where: { id: userId },
+      where: { id: userId },
     });
-    if (!user) throw new NotFoundException("Пользователь не найден");
+    if (!user) throw new NotFoundException('Пользователь не найден');
 
     return user;
   }

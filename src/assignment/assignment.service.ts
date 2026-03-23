@@ -1,4 +1,9 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAssignmentRequest } from './dto/create-assignment.dto';
 import { AssignmentStatus, Prisma } from 'src/generated/prisma/client';
@@ -15,7 +20,7 @@ export class AssignmentService {
     private readonly prismaService: PrismaService,
     private readonly conflictDetector: ConflictDetectorService,
     private readonly workload: WorkloadService,
-    private readonly scheduler: SchedulerService
+    private readonly scheduler: SchedulerService,
   ) {}
 
   async create(userId: string, dto: CreateAssignmentRequest) {
@@ -24,13 +29,13 @@ export class AssignmentService {
     const subject = await this.prismaService.subject.findUnique({
       where: { id: subjectId },
     });
-    if (!subject) throw new NotFoundException("Предмет не найден");
+    if (!subject) throw new NotFoundException('Предмет не найден');
 
     if (groupId) {
       const group = await this.prismaService.group.findUnique({
-        where: { id: groupId},
+        where: { id: groupId },
       });
-      if (!group) throw new NotFoundException("Группа не найдена");
+      if (!group) throw new NotFoundException('Группа не найдена');
     }
 
     try {
@@ -42,13 +47,15 @@ export class AssignmentService {
           userId,
           subjectId,
           groupId,
-          priority
+          priority,
         },
       });
-    } catch(err) {
+    } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
-          throw new ConflictException("Задание для такого предмета или группы уже создано");
+          throw new ConflictException(
+            'Задание для такого предмета или группы уже создано',
+          );
         }
       }
 
@@ -63,31 +70,31 @@ export class AssignmentService {
       where: { id: assignmentId },
     });
 
-    if (!assignment) throw new NotFoundException("Задание не найдено");
+    if (!assignment) throw new NotFoundException('Задание не найдено');
     return assignment;
   }
 
   async getAll(userId: string, dto: GetAssignmentsDto) {
     const where = AssignmentQueryBuilder.buildWhere(userId, dto);
 
-    const { skip, take } = AssignmentQueryBuilder.pagination(dto.page, dto.limit);
+    const { skip, take } = AssignmentQueryBuilder.pagination(
+      dto.page,
+      dto.limit,
+    );
 
     const [assignments, total] = await Promise.all([
       this.prismaService.assignment.findMany({
         where,
-        orderBy: [
-          { priority: 'desc' },
-          { dueDay: 'asc' }
-        ],
+        orderBy: [{ priority: 'desc' }, { dueDay: 'asc' }],
         include: {
           subject: true,
-          group: true
+          group: true,
         },
         skip,
-        take
+        take,
       }),
 
-      this.prismaService.assignment.count({ where })
+      this.prismaService.assignment.count({ where }),
     ]);
 
     return {
@@ -95,12 +102,16 @@ export class AssignmentService {
       meta: {
         total,
         page: dto.page ?? 1,
-        lastPage: Math.ceil(total / (dto.page ?? 10))
-      }
+        lastPage: Math.ceil(total / (dto.page ?? 10)),
+      },
     };
   }
 
-  async update(userId: string, assignmentId: string, newData: UpdateAssignmentRequest) {
+  async update(
+    userId: string,
+    assignmentId: string,
+    newData: UpdateAssignmentRequest,
+  ) {
     await this.isOwner(userId, assignmentId);
 
     const updatedAssignment = await this.prismaService.assignment.update({
@@ -109,7 +120,7 @@ export class AssignmentService {
         title: newData.title,
         description: newData.description,
         dueDay: new Date(newData.dueDay),
-        priority: newData.priority
+        priority: newData.priority,
       },
     });
     return updatedAssignment;
@@ -127,7 +138,7 @@ export class AssignmentService {
   async updateStatus(
     assignmentId: string,
     status: AssignmentStatus,
-    userId: string
+    userId: string,
   ) {
     const assignment = await this.prismaService.assignment.findUnique({
       where: { id: assignmentId },
@@ -145,56 +156,50 @@ export class AssignmentService {
   async getDashboard(userId: string) {
     const now = new Date();
 
-    const [
-      workload,
-      total,
-      pending,
-      completed,
-      overdue,
-      urgent
-    ] = await Promise.all([
-      this.workload.getWorkload(userId),
+    const [workload, total, pending, completed, overdue, urgent] =
+      await Promise.all([
+        this.workload.getWorkload(userId),
 
-      this.prismaService.assignment.count({
-        where: { userId },
-      }),
+        this.prismaService.assignment.count({
+          where: { userId },
+        }),
 
-      this.prismaService.assignment.count({
-        where: {
-          userId,
-          status: "PENDING",
-        },
-      }),
-
-      this.prismaService.assignment.count({
-        where: {
-          userId,
-          status: "COMPLETED",
-        },
-      }),
-
-      this.prismaService.assignment.count({
-        where: {
-          userId,
-          dueDay: {
-            lt: now
+        this.prismaService.assignment.count({
+          where: {
+            userId,
+            status: 'PENDING',
           },
-          status: {
-            not: "COMPLETED",
-          },
-        },
-      }),
+        }),
 
-      this.prismaService.assignment.count({
-        where: {
-          userId,
-          priority: "URGENT",
-          status: {
-            not: "COMPLETED",
+        this.prismaService.assignment.count({
+          where: {
+            userId,
+            status: 'COMPLETED',
           },
-        },
-      })
-    ]);
+        }),
+
+        this.prismaService.assignment.count({
+          where: {
+            userId,
+            dueDay: {
+              lt: now,
+            },
+            status: {
+              not: 'COMPLETED',
+            },
+          },
+        }),
+
+        this.prismaService.assignment.count({
+          where: {
+            userId,
+            priority: 'URGENT',
+            status: {
+              not: 'COMPLETED',
+            },
+          },
+        }),
+      ]);
 
     return {
       workload,
@@ -202,7 +207,7 @@ export class AssignmentService {
       pending,
       completed,
       overdue,
-      urgent
+      urgent,
     };
   }
 
@@ -210,7 +215,7 @@ export class AssignmentService {
     const tasks = await this.prismaService.assignment.findMany({
       where: {
         userId,
-        status: "PENDING",
+        status: 'PENDING',
       },
     });
 
@@ -219,7 +224,7 @@ export class AssignmentService {
 
   async getRescheduleSuggestions(userId: string) {
     const tasks = await this.prismaService.assignment.findMany({
-      where: { userId, status: "PENDING" },
+      where: { userId, status: 'PENDING' },
     });
 
     return this.scheduler.suggestReschedule(tasks);
@@ -231,10 +236,10 @@ export class AssignmentService {
       select: { userId: true },
     });
 
-    if (!assignment) throw new NotFoundException("Задание не найдено");
+    if (!assignment) throw new NotFoundException('Задание не найдено');
 
     if (userId !== assignment.userId) {
-      throw new ForbiddenException("Вы не являетесь владельцем этого задания");
+      throw new ForbiddenException('Вы не являетесь владельцем этого задания');
     }
   }
 }

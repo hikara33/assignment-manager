@@ -1,14 +1,14 @@
-import * as dotenv from "dotenv";
-dotenv.config({ path: ".env.test" });
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.test' });
 
-import { INestApplication } from "@nestjs/common";
-import { Test } from "@nestjs/testing";
-import { AppModule } from "src/app.module";
-import { PrismaService } from "src/prisma/prisma.service";
-import request from "supertest";
-import * as bcrypt from "bcrypt";
+import { INestApplication } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
+import { AppModule } from 'src/app.module';
+import { PrismaService } from 'src/prisma/prisma.service';
+import request from 'supertest';
+import * as bcrypt from 'bcrypt';
 
-describe("Invite (e2e)", () => {
+describe('Invite (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let ownerToken: string;
@@ -32,19 +32,19 @@ describe("Invite (e2e)", () => {
     await prisma.user.deleteMany();
 
     // --- Создаём владельца группы ---
-    const hashedPassword = await bcrypt.hash("12345678", 10);
+    const hashedPassword = await bcrypt.hash('12345678', 10);
     await prisma.user.create({
       data: {
-        email: "owner@test.com",
+        email: 'owner@test.com',
         password: hashedPassword,
-        name: "Owner"
+        name: 'Owner',
       },
     });
 
     // --- Логинимся ---
     const login = await request(app.getHttpServer())
-      .post("/auth/login")
-      .send({ email: "owner@test.com", password: "12345678" });
+      .post('/auth/login')
+      .send({ email: 'owner@test.com', password: '12345678' });
 
     expect(login.status).toBe(200);
     expect(login.body.accessToken).toBeDefined();
@@ -52,9 +52,9 @@ describe("Invite (e2e)", () => {
 
     // --- Создаём группу ---
     const groupRes = await request(app.getHttpServer())
-      .post("/group/create")
-      .set("Authorization", `Bearer ${ownerToken}`)
-      .send({ name: "Test Group" });
+      .post('/group/create')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ name: 'Test Group' });
 
     expect(groupRes.status).toBe(201);
     groupId = groupRes.body.id;
@@ -64,23 +64,23 @@ describe("Invite (e2e)", () => {
     await app.close();
   });
 
-  it("POST /group/:id/invite - должно создать приглашение", async () => {
+  it('POST /group/:id/invite - должно создать приглашение', async () => {
     const res = await request(app.getHttpServer())
       .post(`/group/${groupId}/invite`)
-      .set("Authorization", `Bearer ${ownerToken}`)
-      .send({ email: "invite@test.com" });
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ email: 'invite@test.com' });
 
     expect(res.status).toBe(201);
-    expect(res.body.email).toBe("invite@test.com");
-    expect(res.body.status).toBe("PENDING");
+    expect(res.body.email).toBe('invite@test.com');
+    expect(res.body.status).toBe('PENDING');
   });
 
-  it("POST /group/:id/invite - не может отправить повторное приглашение", async () => {
+  it('POST /group/:id/invite - не может отправить повторное приглашение', async () => {
     // Отправляем повторно
     const res = await request(app.getHttpServer())
       .post(`/group/${groupId}/invite`)
-      .set("Authorization", `Bearer ${ownerToken}`)
-      .send({ email: "invite@test.com" });
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ email: 'invite@test.com' });
 
     expect(res.status).toBe(409);
   });

@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
-import { Assignment } from "src/generated/prisma/client";
-import { SuggestReschedule } from "../interfaces/suggestion.interface";
+import { Injectable } from '@nestjs/common';
+import { Assignment } from 'src/generated/prisma/client';
+import { SuggestReschedule } from '../interfaces/suggestion.interface';
 
 @Injectable()
 export class SchedulerService {
@@ -16,10 +16,10 @@ export class SchedulerService {
 
       map[date].push(task);
     }
-    
+
     const suggestions: SuggestReschedule[] = [];
 
-    for (const [date, tasks] of Object.entries(map)) {
+    for (const [, tasks] of Object.entries(map)) {
       if (tasks.length > 3) {
         const overflow = tasks.slice(3);
 
@@ -31,8 +31,8 @@ export class SchedulerService {
             taskId: task.id,
             taskTitle: task.title,
             from: task.dueDay,
-            to: newDate
-          })
+            to: newDate,
+          });
         });
       }
     }

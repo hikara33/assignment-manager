@@ -1,31 +1,50 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { SignOptions } from 'jsonwebtoken';
-import { isDev } from 'src/utils/is-dev.utils';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from './interfaces/jwt.intreface';
 import * as bcrypt from 'bcrypt';
 import { RegisterRequest } from './dto/register.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginRequest } from './dto/login.dto';
+import ms from 'ms';
+import type { CookieOptions } from 'express';
+import type { RefreshToken } from 'src/generated/prisma/client';
 
 @Injectable()
 export class AuthService {
-  private readonly JWT_ACCESS_TOKEN_TTL: SignOptions['expiresIn'];
-  private readonly JWT_REFRESH_TOKEN_TTL: SignOptions['expiresIn'];
+  private readonly JWT_ACCESS_TOKEN_TTL: NonNullable<SignOptions['expiresIn']>;
+  private readonly JWT_REFRESH_TOKEN_TTL: NonNullable<SignOptions['expiresIn']>;
 
-  private readonly COOKIE_DOMAIN: string;
+  private readonly COOKIE_DOMAIN?: string;
+  private readonly COOKIE_SECURE: boolean;
+  private readonly COOKIE_SAME_SITE: CookieOptions['sameSite'];
 
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
   ) {
-    this.JWT_ACCESS_TOKEN_TTL = this.configService.getOrThrow<SignOptions['expiresIn']>('JWT_ACCESS_TOKEN_TTL');
-    this.JWT_REFRESH_TOKEN_TTL = this.configService.getOrThrow<SignOptions['expiresIn']>('JWT_REFRESH_TOKEN_TTL');
+    this.JWT_ACCESS_TOKEN_TTL = this.configService.getOrThrow<
+      NonNullable<SignOptions['expiresIn']>
+    >('JWT_ACCESS_TOKEN_TTL');
+    this.JWT_REFRESH_TOKEN_TTL = this.configService.getOrThrow<
+      NonNullable<SignOptions['expiresIn']>
+    >('JWT_REFRESH_TOKEN_TTL');
 
-    this.COOKIE_DOMAIN = this.configService.getOrThrow<string>('COOKIE_DOMAIN');
+    this.COOKIE_DOMAIN = this.configService.get<string>('COOKIE_DOMAIN');
+    this.COOKIE_SECURE =
+      this.configService.get<string>('COOKIE_SECURE', 'true') === 'true';
+    this.COOKIE_SAME_SITE = this.configService.get<CookieOptions['sameSite']>(
+      'COOKIE_SAME_SITE',
+      'lax',
+    );
   }
 
   async register(res: Response, dto: RegisterRequest) {
@@ -37,7 +56,8 @@ export class AuthService {
       },
     });
 
-    if (existUser) throw new ConflictException('Пользователь с такой почтой уже существует');
+    if (existUser)
+      throw new ConflictException('Пользователь с такой почтой уже существует');
 
     const hashPassword = await bcrypt.hash(password, 10);
 
@@ -71,29 +91,29 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException("Пользователь не найден");
+      throw new NotFoundException('Пользователь не найден');
     }
 
     const comparePassword = await bcrypt.compare(password, user.password);
     if (!comparePassword) {
-      throw new NotFoundException("Пользователь не найден");
+      throw new NotFoundException('Пользователь не найден');
     }
 
     return await this.auth(res, user.id, user.name);
   }
 
   async refresh(res: Response, req: Request) {
-    const refreshToken = req.cookies['refreshToken'];
+    const refreshToken = this.getRefreshTokenFromRequest(req);
 
     if (!refreshToken) {
-      throw new UnauthorizedException("Недействительный refresh-токен");
+      throw new UnauthorizedException('Недействительный refresh-токен');
     }
 
     let payload: JwtPayload;
     try {
-      payload = await this.jwtService.verifyAsync(refreshToken);
+      payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken);
     } catch {
-      throw new UnauthorizedException("Недействительный refresh-токен");
+      throw new UnauthorizedException('Недействительный refresh-токен');
     }
 
     const tokens = await this.prismaService.refreshToken.findMany({
@@ -102,13 +122,10 @@ export class AuthService {
       },
     });
 
-    const tokenEntity = await Promise.any(
-      tokens.map(async (token) => {
-        const match = await bcrypt.compare(refreshToken, token.hashToken);
-        if (match) return token;
-        throw new Error();
-      })
-    ).catch(() => null);
+    const tokenEntity = await this.findMatchingRefreshToken(
+      refreshToken,
+      tokens,
+    );
 
     if (!tokenEntity) {
       await this.prismaService.refreshToken.deleteMany({
@@ -117,7 +134,7 @@ export class AuthService {
         },
       });
 
-      throw new UnauthorizedException("Reused detected");
+      throw new UnauthorizedException('Reused detected');
     }
 
     await this.prismaService.refreshToken.delete({
@@ -129,8 +146,28 @@ export class AuthService {
     return await this.auth(res, payload.id, payload.name);
   }
 
-  async logout(res: Response) {
-    this.setCookie(res, 'refreshToken', new Date(0));
+  async logout(res: Response, req: Request) {
+    const refreshToken = this.getRefreshTokenFromRequest(req);
+
+    if (refreshToken) {
+      const tokens = await this.prismaService.refreshToken.findMany({
+        where: {
+          userId: await this.decodeUserIdFromRefreshToken(refreshToken),
+        },
+      });
+      const tokenEntity = await this.findMatchingRefreshToken(
+        refreshToken,
+        tokens,
+      );
+
+      if (tokenEntity) {
+        await this.prismaService.refreshToken.delete({
+          where: { id: tokenEntity.id },
+        });
+      }
+    }
+
+    this.setCookie(res, '', new Date(0));
     return true;
   }
 
@@ -151,33 +188,84 @@ export class AuthService {
   }
 
   private setCookie(res: Response, value: string, expires: Date) {
-    res.cookie('refreshToken', value, {
+    const cookieOptions: CookieOptions = {
       httpOnly: true,
       expires,
-      secure: false,
-      sameSite: 'lax',
-    });
+      secure: this.COOKIE_SECURE,
+      sameSite: this.COOKIE_SAME_SITE,
+    };
+
+    if (this.COOKIE_DOMAIN) {
+      cookieOptions.domain = this.COOKIE_DOMAIN;
+    }
+
+    res.cookie('refreshToken', value, cookieOptions);
+  }
+
+  private getRefreshTokenExpiryDate() {
+    return new Date(
+      Date.now() + this.getTtlInMilliseconds(this.JWT_REFRESH_TOKEN_TTL),
+    );
+  }
+
+  private getTtlInMilliseconds(ttl: NonNullable<SignOptions['expiresIn']>) {
+    if (typeof ttl === 'number') {
+      return ttl * 1000;
+    }
+
+    const parsed = ms(ttl);
+    if (typeof parsed !== 'number') {
+      throw new UnauthorizedException('Invalid token TTL');
+    }
+
+    return parsed;
+  }
+
+  private async decodeUserIdFromRefreshToken(token: string): Promise<string> {
+    try {
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
+      return payload.id;
+    } catch {
+      throw new UnauthorizedException('Недействительный refresh-токен');
+    }
+  }
+
+  private getRefreshTokenFromRequest(req: Request): string | null {
+    const cookies = req.cookies as Record<string, unknown> | undefined;
+    const refreshToken = cookies?.refreshToken;
+    return typeof refreshToken === 'string' ? refreshToken : null;
+  }
+
+  private async findMatchingRefreshToken(
+    refreshToken: string,
+    tokens: RefreshToken[],
+  ): Promise<RefreshToken | null> {
+    for (const token of tokens) {
+      const isMatch = await bcrypt.compare(refreshToken, token.hashToken);
+      if (isMatch) {
+        return token;
+      }
+    }
+
+    return null;
   }
 
   private async auth(res: Response, id: string, name: string) {
     const { accessToken, refreshToken } = this.generateTokens(id, name);
 
     const hashToken = await bcrypt.hash(refreshToken, 10);
+    const refreshTokenExpiresAt = this.getRefreshTokenExpiryDate();
 
     await this.prismaService.refreshToken.create({
       data: {
         userId: id,
         hashToken,
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        expiresAt: refreshTokenExpiresAt,
       },
     });
 
-    this.setCookie(
-      res,
-      refreshToken,
-      new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-    );
-    
+    this.setCookie(res, refreshToken, refreshTokenExpiresAt);
+
     return { accessToken };
   }
 
@@ -185,11 +273,11 @@ export class AuthService {
     const user = await this.prismaService.user.findUnique({
       where: {
         id: payload.id,
-      }
+      },
     });
 
-    if (!user) throw new NotFoundException("Пользователь не найден");
-    
+    if (!user) throw new NotFoundException('Пользователь не найден');
+
     return user;
   }
 

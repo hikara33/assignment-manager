@@ -1,56 +1,54 @@
-import { PrismaService } from "src/prisma/prisma.service";
-import { InviteService } from "./invite.service";
-import { Test } from "@nestjs/testing";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { EmailService } from "../email/email.service";
-import { JwtService } from "@nestjs/jwt";
-import { ConflictException } from "@nestjs/common";
+import { PrismaService } from 'src/prisma/prisma.service';
+import { InviteService } from './invite.service';
+import { Test } from '@nestjs/testing';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EmailService } from '../email/email.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConflictException } from '@nestjs/common';
 
-jest.mock("nodemailer");
+jest.mock('nodemailer');
 
 const jwtMock = {
   sign: jest.fn(),
   verifyAsync: jest.fn(),
 };
 
-describe("Invite Service (Integration)", () => {
+describe('Invite Service (Integration)', () => {
   let service: InviteService;
   let prisma: PrismaService;
   let moduleRef: any;
 
   const sendMailMock = {
-    sendGroupInvite: jest.fn()
+    sendGroupInvite: jest.fn(),
   };
 
   beforeAll(async () => {
-    jwtMock.sign.mockImplementation(() => "test-token");
+    jwtMock.sign.mockImplementation(() => 'test-token');
     jwtMock.verifyAsync.mockReset();
 
     const module = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ envFilePath: ".env.test" })
-      ],
+      imports: [ConfigModule.forRoot({ envFilePath: '.env.test' })],
       providers: [
         InviteService,
         PrismaService,
         {
           provide: JwtService,
-          useValue: jwtMock
+          useValue: jwtMock,
         },
         {
           provide: EmailService,
-          useValue: sendMailMock
+          useValue: sendMailMock,
         },
         {
           provide: ConfigService,
           useValue: {
             getOrThrow: jest.fn((key: string) => {
-              if (key === "JWT_INVITE_TTL") return "1h";
+              if (key === 'JWT_INVITE_TTL') return '1h';
               throw new Error(`Unknown config key: ${key}`);
-            })
-          }
-        }
-      ]
+            }),
+          },
+        },
+      ],
     }).compile();
 
     moduleRef = module;
@@ -69,147 +67,145 @@ describe("Invite Service (Integration)", () => {
     await moduleRef?.close?.();
   });
 
-  it("should create invite if owner invites user", async () => {
+  it('should create invite if owner invites user', async () => {
     const owner = await prisma.user.create({
       data: {
-        email: "owner@test.com",
-        name: "Owner",
-        password: "123",
+        email: 'owner@test.com',
+        name: 'Owner',
+        password: '123',
       },
     });
 
-    const group = await prisma.group.create({ data: { name: "Test Group" }});
+    const group = await prisma.group.create({ data: { name: 'Test Group' } });
     await prisma.userGroup.create({
       data: {
         userId: owner.id,
         groupId: group.id,
-        role: "OWNER",
+        role: 'OWNER',
       },
     });
 
-    await service.inviteUser("invite@test.com", group.id, owner.id);
-    const invite = await prisma.groupInvite.findFirst({ where: { email: "invite@test.com" }});
+    await service.inviteUser('invite@test.com', group.id, owner.id);
+    const invite = await prisma.groupInvite.findFirst({
+      where: { email: 'invite@test.com' },
+    });
 
     expect(invite).toBeDefined();
-    expect(invite?.status).toBe("PENDING");
+    expect(invite?.status).toBe('PENDING');
 
     expect(sendMailMock.sendGroupInvite).toHaveBeenCalled();
   });
 
-  it("should throw if inviter is not owner", async () => {
+  it('should throw if inviter is not owner', async () => {
     const user = await prisma.user.create({
       data: {
-        email: "user@test.com",
-        name: "User",
-        password: "123",
+        email: 'user@test.com',
+        name: 'User',
+        password: '123',
       },
     });
 
-    const group = await prisma.group.create({ data: { name: "Test Group" }});
+    const group = await prisma.group.create({ data: { name: 'Test Group' } });
     await prisma.userGroup.create({
       data: {
         userId: user.id,
         groupId: group.id,
-        role: "MEMBER",
+        role: 'MEMBER',
       },
     });
 
     await expect(
-      service.inviteUser("user@test.com", group.id, user.id)
+      service.inviteUser('user@test.com', group.id, user.id),
     ).rejects.toThrow(ConflictException);
   });
 
-  it("should throw if invite already exists", async () => {
+  it('should throw if invite already exists', async () => {
     const owner = await prisma.user.create({
       data: {
-        email: "owner@test.com",
-        name: "Owner",
-        password: "123",
+        email: 'owner@test.com',
+        name: 'Owner',
+        password: '123',
       },
     });
 
-    const group = await prisma.group.create({ data: { name: "Test Group" }});
+    const group = await prisma.group.create({ data: { name: 'Test Group' } });
     await prisma.userGroup.create({
       data: {
         userId: owner.id,
         groupId: group.id,
-        role: "OWNER",
+        role: 'OWNER',
       },
     });
 
-    const token = service["generateToken"](
-      "invite@test.com",
+    const token = service['generateToken'](
+      'invite@test.com',
       group.id,
       owner.id,
     );
 
     await prisma.groupInvite.create({
       data: {
-        email: "invite@test.com",
-        token: service["hashToken"](token),
+        email: 'invite@test.com',
+        token: service['hashToken'](token),
         groupId: group.id,
         invitedById: owner.id,
-        status: "PENDING",
+        status: 'PENDING',
         expiresAt: new Date(Date.now() + 100000),
       },
     });
 
     await expect(
-      service.inviteUser(
-        "invite@test.com",
-        group.id,
-        owner.id
-      )
+      service.inviteUser('invite@test.com', group.id, owner.id),
     ).rejects.toThrow(ConflictException);
   });
 
   //accept
-  it("should accept invite", async () => {
+  it('should accept invite', async () => {
     const owner = await prisma.user.create({
       data: {
-        email: "owner@test.com",
-        name: "Owner",
-        password: "123",
+        email: 'owner@test.com',
+        name: 'Owner',
+        password: '123',
       },
     });
 
     const invitedUser = await prisma.user.create({
       data: {
-        email: "invite@test.com",
-        name: "Invite",
-        password: "123",
+        email: 'invite@test.com',
+        name: 'Invite',
+        password: '123',
       },
     });
 
-    const group = await prisma.group.create({ data: { name: "Test Group" }});
+    const group = await prisma.group.create({ data: { name: 'Test Group' } });
     await prisma.userGroup.create({
       data: {
         userId: owner.id,
         groupId: group.id,
-        role: "OWNER",
+        role: 'OWNER',
       },
     });
 
-    const token = service["generateToken"](
+    const token = service['generateToken'](
       invitedUser.email,
       group.id,
-      owner.id
+      owner.id,
     );
 
-    (jwtMock.verifyAsync as jest.Mock).mockResolvedValue({
+    jwtMock.verifyAsync.mockResolvedValue({
       email: invitedUser.email,
       groupId: group.id,
       invitedById: owner.id,
-      type: "GROUP_INVITE"
+      type: 'GROUP_INVITE',
     });
 
     await prisma.groupInvite.create({
       data: {
         email: invitedUser.email,
-        token: service["hashToken"](token),
+        token: service['hashToken'](token),
         groupId: group.id,
         invitedById: owner.id,
-        status: "PENDING",
+        status: 'PENDING',
         expiresAt: new Date(Date.now() + 100000),
       },
     });
@@ -218,123 +214,120 @@ describe("Invite Service (Integration)", () => {
 
     const membership = await prisma.userGroup.findUnique({
       where: {
-        userId_groupId: { userId: invitedUser.id, groupId: group.id }
-      }
+        userId_groupId: { userId: invitedUser.id, groupId: group.id },
+      },
     });
     expect(membership).toBeDefined();
 
     const invite = await prisma.groupInvite.findFirst({
-      where: { email: invitedUser.email }
+      where: { email: invitedUser.email },
     });
-    expect(invite?.status).toBe("ACCEPTED");
+    expect(invite?.status).toBe('ACCEPTED');
   });
 
-  it("should not accept invite for another user", async () => {
+  it('should not accept invite for another user', async () => {
     const owner = await prisma.user.create({
       data: {
-        email: "owner@test.com",
-        name: "Owner",
-        password: "123",
+        email: 'owner@test.com',
+        name: 'Owner',
+        password: '123',
       },
     });
 
     const invitedUser = await prisma.user.create({
       data: {
-        email: "invite@test.com",
-        name: "Invite",
-        password: "123",
+        email: 'invite@test.com',
+        name: 'Invite',
+        password: '123',
       },
     });
 
     const anotherUser = await prisma.user.create({
       data: {
-        email: "another@test.com",
-        name: "Another",
-        password: "123",
+        email: 'another@test.com',
+        name: 'Another',
+        password: '123',
       },
     });
 
-    const group = await prisma.group.create({ data: { name: "Test Group" }});
+    const group = await prisma.group.create({ data: { name: 'Test Group' } });
     await prisma.userGroup.create({
       data: {
         userId: owner.id,
         groupId: group.id,
-        role: "OWNER",
+        role: 'OWNER',
       },
     });
 
-    const token = service["generateToken"](
+    const token = service['generateToken'](
       invitedUser.email,
       group.id,
-      owner.id
+      owner.id,
     );
 
     await prisma.groupInvite.create({
       data: {
         email: invitedUser.email,
-        token: service["hashToken"](token),
+        token: service['hashToken'](token),
         groupId: group.id,
         invitedById: owner.id,
-        status: "PENDING",
+        status: 'PENDING',
         expiresAt: new Date(Date.now() + 100000),
       },
     });
 
-    await expect(
-      service.acceptInvite(token, anotherUser.id)
-    ).rejects.toThrow();
+    await expect(service.acceptInvite(token, anotherUser.id)).rejects.toThrow();
   });
 
-
   //decline
-  it("should decline invite", async  () => {
+  it('should decline invite', async () => {
     const owner = await prisma.user.create({
       data: {
-        email: "owner@test.com",
-        name: "Owner",
-        password: "123",
+        email: 'owner@test.com',
+        name: 'Owner',
+        password: '123',
       },
     });
 
     const invitedUser = await prisma.user.create({
       data: {
-        email: "invite@test.com",
-        name: "Invite",
-        password: "123",
+        email: 'invite@test.com',
+        name: 'Invite',
+        password: '123',
       },
     });
 
-    const group = await prisma.group.create({ data: { name: "Test Group" }});
+    const group = await prisma.group.create({ data: { name: 'Test Group' } });
     await prisma.userGroup.create({
       data: {
         userId: owner.id,
         groupId: group.id,
-        role: "OWNER",
+        role: 'OWNER',
       },
     });
 
-    const token = service["generateToken"](
+    const token = service['generateToken'](
       invitedUser.email,
       group.id,
-      owner.id
+      owner.id,
     );
 
     await prisma.groupInvite.create({
       data: {
         email: invitedUser.email,
-        token: service["hashToken"](token),
+        token: service['hashToken'](token),
         groupId: group.id,
         invitedById: owner.id,
-        status: "PENDING",
+        status: 'PENDING',
         expiresAt: new Date(Date.now() + 100000),
       },
     });
 
     await service.declineInvite(token, invitedUser.id);
-    
+
     const invite = await prisma.groupInvite.findFirst({
-      where: { email: invitedUser.email }
+      where: { email: invitedUser.email },
     });
-    expect(invite?.status).toBe("DECLINED");
+    expect(invite?.status).toBe('DECLINED');
   });
 });

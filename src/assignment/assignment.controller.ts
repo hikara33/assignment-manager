@@ -1,4 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { AssignmentService } from './assignment.service';
 import { CreateAssignmentRequest } from './dto/create-assignment.dto';
 import { Authorized } from 'src/auth/decorators/authorized.decorator';
@@ -7,91 +16,132 @@ import { UpdateAssignmentRequest } from './dto/update-assignment.dto';
 import { AssignmentStatus } from 'src/generated/prisma/enums';
 import { GetAssignmentsDto } from './dto/get-assignments.dto';
 import { PriorityResolverService } from './services/priority-resolver.service';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Assignment')
+@ApiBearerAuth()
 @Controller('assignment')
 export class AssignmentController {
   constructor(
     private readonly assignmentService: AssignmentService,
-    private readonly priorityResolver: PriorityResolverService
+    private readonly priorityResolver: PriorityResolverService,
   ) {}
 
   @Authorization()
+  @ApiOperation({ summary: 'Создать задание' })
+  @ApiBody({ type: CreateAssignmentRequest })
   @Post('create')
   async create(
     @Authorized('id') id: string,
-    @Body() dto: CreateAssignmentRequest
+    @Body() dto: CreateAssignmentRequest,
   ) {
     return await this.assignmentService.create(id, dto);
   }
 
   @Authorization()
-  @Get(':id')
-  async getOne(
-    @Authorized('id') userId: string,
-    @Param('id') assignmentId: string
-  ) {
-    return await this.assignmentService.getOne(userId, assignmentId);
-  }
-
-  @Authorization()
+  @ApiOperation({ summary: 'Получить список заданий пользователя' })
+  @ApiQuery({ name: 'status', required: false, enum: AssignmentStatus })
   @Get()
-  async getAll(
-    @Authorized('id') id: string,
-    @Query() dto: GetAssignmentsDto
-  ) {
+  async getAll(@Authorized('id') id: string, @Query() dto: GetAssignmentsDto) {
     return await this.assignmentService.getAll(id, dto);
   }
 
   @Authorization()
-  @Patch(':id')
-  async update(
-    @Authorized('id') userId: string,
-    @Param('id') assignmentId: string,
-    @Body() dto: UpdateAssignmentRequest
-  ) {
-    return await this.assignmentService.update(userId, assignmentId, dto);
-  }
-
-  @Authorization()
-  @Delete(':id')
-  async remove(
-    @Authorized('id')userId: string,
-    @Param('id') assignmentId: string
-  ) {
-    return await this.assignmentService.remove(userId, assignmentId);
-  }
-
-  @Authorization()
-  @Patch(':id/status')
-  async updateStatus(
-    @Authorized('id') userId: string,
-    @Param('id') assignmentId: string,
-    @Body('status') status: AssignmentStatus
-  ) {
-    return await this.assignmentService.updateStatus(assignmentId, status, userId);
-  }
-
-  @Authorization()
+  @ApiOperation({ summary: 'Дашборд по заданиям' })
   @Get('dashboard')
   async getDashboard(@Authorized('id') id: string) {
     return await this.assignmentService.getDashboard(id);
   }
 
   @Authorization()
+  @ApiOperation({ summary: 'Приоритизированный список заданий' })
   @Get('prioritized')
   async getPrioritized(@Authorized('id') id: string) {
     return await this.priorityResolver.getPrioritizedAssignments(id);
   }
 
   @Authorization()
+  @ApiOperation({ summary: 'Поиск конфликтов по дедлайнам' })
   @Get('conflicts')
   async getConflicts(@Authorized('id') id: string) {
     return await this.assignmentService.detectConflicts(id);
   }
 
   @Authorization()
+  @ApiOperation({ summary: 'Рекомендации по переносу дедлайнов' })
   @Get('reschedule-suggestions')
   async getRescheduleSuggestions(@Authorized('id') id: string) {
     return await this.assignmentService.getRescheduleSuggestions(id);
+  }
+
+  @Authorization()
+  @ApiOperation({ summary: 'Получить задание по id' })
+  @ApiParam({ name: 'id', description: 'ID задания' })
+  @Get(':id')
+  async getOne(
+    @Authorized('id') userId: string,
+    @Param('id') assignmentId: string,
+  ) {
+    return await this.assignmentService.getOne(userId, assignmentId);
+  }
+
+  @Authorization()
+  @ApiOperation({ summary: 'Обновить задание' })
+  @ApiParam({ name: 'id', description: 'ID задания' })
+  @ApiBody({ type: UpdateAssignmentRequest })
+  @Patch(':id')
+  async update(
+    @Authorized('id') userId: string,
+    @Param('id') assignmentId: string,
+    @Body() dto: UpdateAssignmentRequest,
+  ) {
+    return await this.assignmentService.update(userId, assignmentId, dto);
+  }
+
+  @Authorization()
+  @ApiOperation({ summary: 'Обновить статус задания' })
+  @ApiParam({ name: 'id', description: 'ID задания' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        status: {
+          type: 'string',
+          enum: Object.values(AssignmentStatus),
+          example: AssignmentStatus.COMPLETED,
+        },
+      },
+      required: ['status'],
+    },
+  })
+  @Patch(':id/status')
+  async updateStatus(
+    @Authorized('id') userId: string,
+    @Param('id') assignmentId: string,
+    @Body('status') status: AssignmentStatus,
+  ) {
+    return await this.assignmentService.updateStatus(
+      assignmentId,
+      status,
+      userId,
+    );
+  }
+
+  @Authorization()
+  @ApiOperation({ summary: 'Удалить задание' })
+  @ApiParam({ name: 'id', description: 'ID задания' })
+  @Delete(':id')
+  async remove(
+    @Authorized('id') userId: string,
+    @Param('id') assignmentId: string,
+  ) {
+    return await this.assignmentService.remove(userId, assignmentId);
   }
 }

@@ -16,13 +16,14 @@ export class SubjectService {
       },
     });
 
-    if (existSubject) throw new ConflictException("Предмет с таким названием уже существует");
+    if (existSubject)
+      throw new ConflictException('Предмет с таким названием уже существует');
 
     return await this.prismaService.subject.create({
       data: {
         name,
         description,
-      }
+      },
     });
   }
 

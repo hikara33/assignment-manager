@@ -1,5 +1,5 @@
-import { ConfigService } from "@nestjs/config";
+import { ConfigService } from '@nestjs/config';
 
 export const isDev = (configService: ConfigService) => {
-  return configService.getOrThrow('NODE_MODE') === 'development';
-}
+  return configService.getOrThrow('NODE_ENV') === 'development';
+};

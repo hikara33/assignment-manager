@@ -1,5 +1,5 @@
-import { Request } from "express";
-import { UserRole } from "src/generated/prisma/enums";
+import { Request } from 'express';
+import { UserRole } from 'src/generated/prisma/enums';
 
 export interface AuthRequest extends Request {
   user: {
@@ -10,5 +10,5 @@ export interface AuthRequest extends Request {
     role: UserRole;
     createdAt: Date;
     updatedAt: Date;
-  }
-};
+  };
+}

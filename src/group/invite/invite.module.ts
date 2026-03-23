@@ -11,12 +11,12 @@ import { EmailModule } from '../email/email.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: getJwtInviteConfig,
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
-    EmailModule
+    EmailModule,
   ],
   controllers: [InviteController],
   providers: [InviteService],
-  exports: [InviteService]
+  exports: [InviteService],
 })
 export class InviteModule {}
