@@ -48,6 +48,13 @@ export class GroupController {
   }
 
   @Authorization()
+  @ApiOperation({ summary: 'Получить список групп пользователя' })
+  @Get('my')
+  async getUserGroups(@Authorized('id') userId: string) {
+    return this.groupService.getUserGroups(userId);
+  }
+
+  @Authorization()
   @ApiOperation({ summary: 'Принять приглашение в группу' })
   @ApiBody({
     schema: {
@@ -79,6 +86,13 @@ export class GroupController {
     @Body('token') token: string,
   ) {
     return this.inviteService.declineInvite(token, id);
+  }
+
+  @ApiOperation({ summary: 'Получить группу по айди' })
+  @Authorization()
+  @Get(':id')
+  async getGroup(@Param('id') groupId: string) {
+    return this.groupService.getGroupById(groupId);
   }
 
   @UseGuards(JwtGuard, GroupRoleGuard)

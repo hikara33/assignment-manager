@@ -33,6 +33,21 @@ export class GroupService {
     });
   }
 
+  async getUserGroups(userId: string) {
+    return this.prismaService.userGroup
+      .findMany({
+        where: { userId },
+        include: { group: true },
+      })
+      .then((res) => res.map((r) => r.group));
+  }
+
+  async getGroupById(groupId: string) {
+    return this.prismaService.group.findUnique({
+      where: { id: groupId },
+    });
+  }
+
   async delete(userId: string, groupId: string) {
     const role = await this.getUserRole(userId, groupId);
 
