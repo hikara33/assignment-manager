@@ -1,5 +1,6 @@
 import {
   IsDateString,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -39,5 +40,7 @@ export class CreateAssignmentRequest {
     enum: AssignmentPriority,
     example: AssignmentPriority.MEDIUM,
   })
+  @IsOptional()
+  @IsEnum(AssignmentPriority)
   priority?: AssignmentPriority;
 }
