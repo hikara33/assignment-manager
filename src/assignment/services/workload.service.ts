@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { WorkloadResult } from '../interfaces/workload.interface';
+import { AssignmentQueryBuilder } from '../builders/assignment-query.builder';
 
 @Injectable()
 export class WorkloadService {
   constructor(private readonly prisma: PrismaService) {}
-  async getWorkload(userId: string) {
+
+  async getWorkload(userId: string, groupIds: string[]) {
     const now = new Date();
 
     const tomorrow = new Date();
@@ -14,34 +16,51 @@ export class WorkloadService {
     const week = new Date();
     week.setDate(now.getDate() + 7);
 
+    const visible = AssignmentQueryBuilder.buildVisibilityWhere(
+      userId,
+      groupIds,
+    );
+
     const [today, tomorrowTasks, weekTasks] = await Promise.all([
       this.prisma.assignment.count({
         where: {
-          userId,
-          dueDay: {
-            gte: now,
-            lt: tomorrow,
-          },
+          AND: [
+            visible,
+            {
+              dueDay: {
+                gte: now,
+                lt: tomorrow,
+              },
+            },
+          ],
         },
       }),
 
       this.prisma.assignment.count({
         where: {
-          userId,
-          dueDay: {
-            gte: tomorrow,
-            lt: week,
-          },
+          AND: [
+            visible,
+            {
+              dueDay: {
+                gte: tomorrow,
+                lt: week,
+              },
+            },
+          ],
         },
       }),
 
       this.prisma.assignment.count({
         where: {
-          userId,
-          dueDay: {
-            gte: now,
-            lt: week,
-          },
+          AND: [
+            visible,
+            {
+              dueDay: {
+                gte: now,
+                lt: week,
+              },
+            },
+          ],
         },
       }),
     ]);

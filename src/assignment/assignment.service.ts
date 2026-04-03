@@ -44,7 +44,7 @@ export class AssignmentService {
           title,
           description,
           dueDay: new Date(dueDay),
-          userId,
+          userId: groupId ? null : userId,
           subjectId,
           groupId,
           priority,
@@ -64,32 +64,20 @@ export class AssignmentService {
   }
 
   async getOne(userId: string, assignmentId: string) {
-    await this.isOwner(userId, assignmentId);
-
-    const assignment = await this.prismaService.assignment.findUnique({
-      where: { id: assignmentId },
-    });
-
-    if (!assignment) throw new NotFoundException('Задание не найдено');
-    return assignment;
+    return this.getAssignmentIfAccessible(userId, assignmentId);
   }
 
   async getAll(userId: string, dto: GetAssignmentsDto) {
-    const userGroups = await this.prismaService.userGroup.findMany({
-      where: { userId },
-      select: { groupId: true },
-    });
-    const groupIds = userGroups.map((g) => g.groupId);
+    const groupIds = await this.getUserGroupIds(userId);
 
-    const baseWhere = AssignmentQueryBuilder.buildWhere(userId, dto);
+    const filterWhere = AssignmentQueryBuilder.buildFilterWhere(dto);
+    const visibilityWhere = AssignmentQueryBuilder.buildVisibilityWhere(
+      userId,
+      groupIds,
+    );
 
-    const where = {
-      AND: [
-        baseWhere,
-        {
-          OR: [{ userId }, { groupId: { in: groupIds } }],
-        },
-      ],
+    const where: Prisma.AssignmentWhereInput = {
+      AND: [visibilityWhere, filterWhere],
     };
 
     const { skip, take } = AssignmentQueryBuilder.pagination(
@@ -127,7 +115,7 @@ export class AssignmentService {
     assignmentId: string,
     newData: UpdateAssignmentRequest,
   ) {
-    await this.isOwner(userId, assignmentId);
+    await this.assertAssignmentAccess(userId, assignmentId);
 
     const updatedAssignment = await this.prismaService.assignment.update({
       where: { id: assignmentId },
@@ -142,7 +130,7 @@ export class AssignmentService {
   }
 
   async remove(userId: string, assignmentId: string): Promise<boolean> {
-    await this.isOwner(userId, assignmentId);
+    await this.assertAssignmentAccess(userId, assignmentId);
 
     await this.prismaService.assignment.delete({
       where: { id: assignmentId },
@@ -155,12 +143,7 @@ export class AssignmentService {
     status: AssignmentStatus,
     userId: string,
   ) {
-    const assignment = await this.prismaService.assignment.findUnique({
-      where: { id: assignmentId },
-    });
-
-    if (!assignment) throw new NotFoundException();
-    if (assignment.userId !== userId) throw new ForbiddenException();
+    await this.assertAssignmentAccess(userId, assignmentId);
 
     return await this.prismaService.assignment.update({
       where: { id: assignmentId },
@@ -200,48 +183,49 @@ export class AssignmentService {
 
   async getDashboard(userId: string) {
     const now = new Date();
+    const groupIds = await this.getUserGroupIds(userId);
+    const visible = AssignmentQueryBuilder.buildVisibilityWhere(
+      userId,
+      groupIds,
+    );
 
     const [workload, total, pending, completed, overdue, urgent] =
       await Promise.all([
-        this.workload.getWorkload(userId),
+        this.workload.getWorkload(userId, groupIds),
 
         this.prismaService.assignment.count({
-          where: { userId },
+          where: visible,
+        }),
+
+        this.prismaService.assignment.count({
+          where: { AND: [visible, { status: 'PENDING' }] },
+        }),
+
+        this.prismaService.assignment.count({
+          where: { AND: [visible, { status: 'COMPLETED' }] },
         }),
 
         this.prismaService.assignment.count({
           where: {
-            userId,
-            status: 'PENDING',
+            AND: [
+              visible,
+              {
+                dueDay: { lt: now },
+                status: { not: 'COMPLETED' },
+              },
+            ],
           },
         }),
 
         this.prismaService.assignment.count({
           where: {
-            userId,
-            status: 'COMPLETED',
-          },
-        }),
-
-        this.prismaService.assignment.count({
-          where: {
-            userId,
-            dueDay: {
-              lt: now,
-            },
-            status: {
-              not: 'COMPLETED',
-            },
-          },
-        }),
-
-        this.prismaService.assignment.count({
-          where: {
-            userId,
-            priority: 'URGENT',
-            status: {
-              not: 'COMPLETED',
-            },
+            AND: [
+              visible,
+              {
+                priority: 'URGENT',
+                status: { not: 'COMPLETED' },
+              },
+            ],
           },
         }),
       ]);
@@ -257,34 +241,69 @@ export class AssignmentService {
   }
 
   async detectConflicts(userId: string) {
+    const groupIds = await this.getUserGroupIds(userId);
+    const visible = AssignmentQueryBuilder.buildVisibilityWhere(
+      userId,
+      groupIds,
+    );
     const tasks = await this.prismaService.assignment.findMany({
-      where: {
-        userId,
-        status: 'PENDING',
-      },
+      where: { AND: [visible, { status: 'PENDING' }] },
     });
 
     return this.conflictDetector.detect(tasks);
   }
 
   async getRescheduleSuggestions(userId: string) {
+    const groupIds = await this.getUserGroupIds(userId);
+    const visible = AssignmentQueryBuilder.buildVisibilityWhere(
+      userId,
+      groupIds,
+    );
     const tasks = await this.prismaService.assignment.findMany({
-      where: { userId, status: 'PENDING' },
+      where: { AND: [visible, { status: 'PENDING' }] },
     });
 
     return this.scheduler.suggestReschedule(tasks);
   }
 
-  private async isOwner(userId: string, assignmentId: string): Promise<void> {
+  private async getUserGroupIds(userId: string): Promise<string[]> {
+    const rows = await this.prismaService.userGroup.findMany({
+      where: { userId },
+      select: { groupId: true },
+    });
+    return rows.map((r) => r.groupId);
+  }
+
+  /** Одна задание с предметом и группой, если у пользователя есть доступ */
+  private async getAssignmentIfAccessible(
+    userId: string,
+    assignmentId: string,
+  ) {
     const assignment = await this.prismaService.assignment.findUnique({
       where: { id: assignmentId },
-      select: { userId: true },
+      include: { subject: true, group: true },
     });
 
     if (!assignment) throw new NotFoundException('Задание не найдено');
 
-    if (userId !== assignment.userId) {
-      throw new ForbiddenException('Вы не являетесь владельцем этого задания');
+    if (assignment.userId === userId) return assignment;
+
+    if (assignment.groupId) {
+      const member = await this.prismaService.userGroup.findUnique({
+        where: {
+          userId_groupId: { userId, groupId: assignment.groupId },
+        },
+      });
+      if (member) return assignment;
     }
+
+    throw new ForbiddenException('Нет доступа к этому заданию');
+  }
+
+  private async assertAssignmentAccess(
+    userId: string,
+    assignmentId: string,
+  ): Promise<void> {
+    await this.getAssignmentIfAccessible(userId, assignmentId);
   }
 }

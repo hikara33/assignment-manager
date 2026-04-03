@@ -47,18 +47,38 @@ export class AutomationService {
         },
         status: 'PENDING',
       },
-      include: { user: { select: { email: true } } },
+      include: {
+        user: { select: { email: true } },
+        group: {
+          include: {
+            members: {
+              include: { user: { select: { email: true } } },
+            },
+          },
+        },
+      },
     });
 
-    await Promise.all(
-      taskDue.map((task) =>
-        this.emailService.sendAssignmentReminder(
-          task.user.email,
-          task.title,
-          task.dueDay,
+    const sendForTask = (task: (typeof taskDue)[number]) => {
+      const emails = new Set<string>();
+      if (task.user?.email) emails.add(task.user.email);
+      if (task.group?.members) {
+        for (const m of task.group.members) {
+          emails.add(m.user.email);
+        }
+      }
+      return Promise.all(
+        [...emails].map((email) =>
+          this.emailService.sendAssignmentReminder(
+            email,
+            task.title,
+            task.dueDay,
+          ),
         ),
-      ),
-    );
+      );
+    };
+
+    await Promise.all(taskDue.map((task) => sendForTask(task)));
 
     this.logger.log(`Sent ${taskDue.length} deadline reminders`);
   }

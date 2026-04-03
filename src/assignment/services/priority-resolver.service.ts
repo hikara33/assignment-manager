@@ -1,14 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { Assignment } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AssignmentQueryBuilder } from '../builders/assignment-query.builder';
 
 @Injectable()
 export class PriorityResolverService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getPrioritizedAssignments(userId: string) {
-    const tasks = await this.prismaService.assignment.findMany({
+    const rows = await this.prismaService.userGroup.findMany({
       where: { userId },
+      select: { groupId: true },
+    });
+    const groupIds = rows.map((r) => r.groupId);
+    const visible = AssignmentQueryBuilder.buildVisibilityWhere(
+      userId,
+      groupIds,
+    );
+
+    const tasks = await this.prismaService.assignment.findMany({
+      where: visible,
     });
 
     return tasks
