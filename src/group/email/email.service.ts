@@ -33,7 +33,7 @@ export class EmailService {
   async sendGroupInvite(email: string, token: string) {
     const base =
       this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3001';
-    const link = `${base.replace(/\/$/, '')}/invite?token=${encodeURIComponent(token)}`;
+    const link = `${base.replace(/\/$/, '')}/invite/accept?token=${encodeURIComponent(token)}`;
 
     await this.transporter.sendMail({
       from: this.FROM,

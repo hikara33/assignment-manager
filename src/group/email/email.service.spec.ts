@@ -15,6 +15,12 @@ describe('EmailService', () => {
     });
 
     const mockConfig = {
+      get: jest.fn((key: string) => {
+        const config = {
+          FRONTEND_URL: 'http://localhost:3000',
+        };
+        return config[key];
+      }),
       getOrThrow: jest.fn((key: string) => {
         const config = {
           SMTP_HOST: 'smtp.test.com',
