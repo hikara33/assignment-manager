@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { GroupService } from './group.service';
@@ -20,6 +21,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 
@@ -86,6 +88,17 @@ export class GroupController {
     @Body('token') token: string,
   ) {
     return this.inviteService.declineInvite(token, id);
+  }
+
+  @ApiOperation({
+    summary: 'Предпросмотр приглашения (без авторизации)',
+    description:
+      'По JWT токену из ссылки: email, группа, зарегистрирован ли пользователь с этим email',
+  })
+  @ApiQuery({ name: 'token', required: true })
+  @Get('invite/preview')
+  async previewInvite(@Query('token') token: string) {
+    return this.inviteService.previewInvite(token);
   }
 
   @ApiOperation({ summary: 'Получить группу по айди' })

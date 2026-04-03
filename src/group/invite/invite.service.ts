@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -98,6 +99,39 @@ export class InviteService {
 
     await this.emailService.sendGroupInvite(email, token);
     return result;
+  }
+
+  async previewInvite(token: string) {
+    if (!token?.trim()) {
+      throw new BadRequestException('Токен обязателен');
+    }
+
+    await this.verifyToken(token);
+    const invite = await this.getInviteByToken(token);
+    this.ensureInvitePending(invite);
+    await this.ensureInviteNotExpired(invite);
+
+    const group = await this.prismaService.group.findUnique({
+      where: { id: invite.groupId },
+      select: { id: true, name: true },
+    });
+    if (!group) {
+      throw new NotFoundException('Группа не найдена');
+    }
+
+    const existingUser = await this.prismaService.user.findFirst({
+      where: {
+        email: { equals: invite.email, mode: 'insensitive' },
+      },
+      select: { id: true },
+    });
+
+    return {
+      email: invite.email,
+      groupId: group.id,
+      groupName: group.name,
+      userRegistered: !!existingUser,
+    };
   }
 
   async acceptInvite(token: string, userId: string) {
@@ -227,7 +261,9 @@ export class InviteService {
   }
 
   private ensureInviteForUser(userEmail: string, inviteEmail: string) {
-    if (userEmail !== inviteEmail) {
+    const a = userEmail.trim().toLowerCase();
+    const b = inviteEmail.trim().toLowerCase();
+    if (a !== b) {
       throw new ForbiddenException('Это приглашение не для вас');
     }
   }

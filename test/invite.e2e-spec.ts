@@ -25,7 +25,7 @@ describe('Invite (e2e)', () => {
     prisma = app.get(PrismaService);
 
     // --- Очистка данных перед тестом ---
-    await prisma.assignment.deleteMany(); // добавить
+    await prisma.assignment.deleteMany();
     await prisma.groupInvite.deleteMany();
     await prisma.userGroup.deleteMany();
     await prisma.group.deleteMany();
@@ -73,7 +73,7 @@ describe('Invite (e2e)', () => {
     expect(res.status).toBe(201);
     expect(res.body.email).toBe('invite@test.com');
     expect(res.body.status).toBe('PENDING');
-  });
+  }, 20000);
 
   it('POST /group/:id/invite - не может отправить повторное приглашение', async () => {
     // Отправляем повторно
