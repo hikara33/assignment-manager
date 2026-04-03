@@ -75,7 +75,22 @@ export class AssignmentService {
   }
 
   async getAll(userId: string, dto: GetAssignmentsDto) {
-    const where = AssignmentQueryBuilder.buildWhere(userId, dto);
+    const userGroups = await this.prismaService.userGroup.findMany({
+      where: { userId },
+      select: { groupId: true },
+    });
+    const groupIds = userGroups.map((g) => g.groupId);
+
+    const baseWhere = AssignmentQueryBuilder.buildWhere(userId, dto);
+
+    const where = {
+      AND: [
+        baseWhere,
+        {
+          OR: [{ userId }, { groupId: { in: groupIds } }],
+        },
+      ],
+    };
 
     const { skip, take } = AssignmentQueryBuilder.pagination(
       dto.page,
@@ -151,6 +166,36 @@ export class AssignmentService {
       where: { id: assignmentId },
       data: { status },
     });
+  }
+
+  async getAllForGroup(groupId: string, dto?: GetAssignmentsDto) {
+    const { skip, take } = AssignmentQueryBuilder.pagination(
+      dto?.page ?? 1,
+      dto?.limit ?? 10,
+    );
+
+    const [assignments, total] = await Promise.all([
+      this.prismaService.assignment.findMany({
+        where: { groupId },
+        orderBy: [{ priority: 'desc' }, { dueDay: 'asc' }],
+        include: {
+          subject: true,
+          group: true,
+        },
+        skip,
+        take,
+      }),
+      this.prismaService.assignment.count({ where: { groupId } }),
+    ]);
+
+    return {
+      data: assignments,
+      meta: {
+        total,
+        page: dto?.page ?? 1,
+        lastPage: Math.ceil(total / (dto?.limit ?? 10)),
+      },
+    };
   }
 
   async getDashboard(userId: string) {

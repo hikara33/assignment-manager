@@ -61,8 +61,8 @@ model Assignment {
   status   AssignmentStatus   @default(PENDING)
   priority AssignmentPriority @default(MEDIUM)
 
-  userId String @map("user_id")
-  user   User   @relation("user-assignemnts", fields: [userId], references: [id], onDelete: Cascade)
+  userId String? @map("user_id")
+  user   User?   @relation("user-assignemnts", fields: [userId], references: [id], onDelete: Cascade)
 
   subjectId String  @map("subject_id")
   subject   Subject @relation("subject-assignments", fields: [subjectId], references: [id])

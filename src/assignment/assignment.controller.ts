@@ -144,4 +144,11 @@ export class AssignmentController {
   ) {
     return await this.assignmentService.remove(userId, assignmentId);
   }
+
+  @Authorization()
+  @ApiOperation({ summary: 'Получить список заданий группы' })
+  @Get('group/:groupId')
+  async getByGroup(@Param('groupId') groupId: string) {
+    return await this.assignmentService.getAllForGroup(groupId);
+  }
 }
