@@ -1,37 +1,37 @@
-version: '3.9'
-
+version: "3.9" 
 services:
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile 
-    container_name: assignment-manager-test
-    env_file:
-      - .env.test
-    volumes:
-      - .:/app
-      - /app/node_modules
-    depends_on:
-      db:
-        condition: service_healthy
-    command: npm run test
-    restart: "no"
-
-  db:
+  assignment-db-test:
     image: postgres:16
     container_name: assignment-db-test
-    env_file:
-      - .env.test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: assignment_test
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data_test:/var/lib/postgresql/data
-      - ./init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql
+      - assignment-manager_postgres_data_test:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      retries: 10
+
+  assignment-manager-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: assignment-manager-test
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@assignment-db-test:5432/assignment_test?schema=public"
+      NODE_ENV: test
+    depends_on:
+      assignment-db-test:
+        condition: service_healthy
+    command: >
+      sh -c "
+        npx prisma migrate deploy &&
+        npm run test
+      "
 
 volumes:
-  postgres_data_test:
+  assignment-manager_postgres_data_test:
