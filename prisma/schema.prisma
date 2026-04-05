@@ -68,16 +68,15 @@ model Assignment {
   subject   Subject @relation("subject-assignments", fields: [subjectId], references: [id])
 
   groupId String? @map("group_id")
-  group   Group?  @relation("group-assignemnts", fields: [groupId], references: [id])
+  group   Group?  @relation("group-assignemnts", fields: [groupId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
 
+  @@unique([title, subjectId])
   @@index([status])
   @@index([priority])
   @@index([dueDay])
-
-  @@unique([title, subjectId])
   @@map("assignments")
 }
 
