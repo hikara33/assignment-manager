@@ -68,6 +68,9 @@ export class AssignmentService {
   }
 
   async getAll(userId: string, dto: GetAssignmentsDto) {
+    const page = dto.page ?? 1;
+    const limit = dto.limit ?? 10;
+
     const groupIds = await this.getUserGroupIds(userId);
 
     const filterWhere = AssignmentQueryBuilder.buildFilterWhere(dto);
@@ -80,10 +83,7 @@ export class AssignmentService {
       AND: [visibilityWhere, filterWhere],
     };
 
-    const { skip, take } = AssignmentQueryBuilder.pagination(
-      dto.page,
-      dto.limit,
-    );
+    const { skip, take } = AssignmentQueryBuilder.pagination(page, limit);
 
     const [assignments, total] = await Promise.all([
       this.prismaService.assignment.findMany({
@@ -100,12 +100,17 @@ export class AssignmentService {
       this.prismaService.assignment.count({ where }),
     ]);
 
+    const lastPage = Math.max(1, Math.ceil(total / limit));
+
     return {
       data: assignments,
       meta: {
         total,
-        page: dto.page ?? 1,
-        lastPage: Math.ceil(total / (dto.page ?? 10)),
+        page,
+        limit,
+        lastPage,
+        hasNextPage: page < lastPage,
+        hasPrevPage: page > 1,
       },
     };
   }
