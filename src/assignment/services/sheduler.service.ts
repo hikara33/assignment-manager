@@ -17,9 +17,26 @@ export class SchedulerService {
   suggestReschedule(tasks: Assignment[]): SuggestReschedule[] {
     const grouped = this.groupByDate(tasks);
     const scores = this.calculateScores(grouped);
+
     const suggestions: SuggestReschedule[] = [];
 
-    
+    for (const [date, dayTasks] of grouped) {
+      const score = scores.get(date)!;
+
+      if (score < this.THRESHOLD) continue;
+
+      const movable = [...dayTasks]
+        .filter((task) => this.isMovable(task))
+        .sort((a, b) => {
+          const priorityDiff =
+            this.weights[a.priority] - this.weights[b.priority];
+          if (priorityDiff !== 0) {
+            return priorityDiff;
+          }
+
+          return b.dueDay.getTime() - a.dueDay.getTime();
+        });
+    }
   }
 
   private groupByDate(tasks: Assignment[]) {
@@ -50,5 +67,14 @@ export class SchedulerService {
     }
 
     return scores;
+  }
+
+  private isMovable(task: Assignment) {
+    if (task.priority === 'URGENT') return false;
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return task.dueDay > tomorrow;
   }
 }
