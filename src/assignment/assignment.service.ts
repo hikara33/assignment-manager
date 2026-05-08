@@ -271,6 +271,36 @@ export class AssignmentService {
     return this.scheduler.suggestReschedule(tasks);
   }
 
+  async rescheduleAssignment(userId: string, id: string, to: string) {
+    const task = await this.prismaService.assignment.findFirst({
+      where: {
+        id,
+        userId,
+      },
+    });
+
+    if (!task) throw new NotFoundException('Task not found');
+
+    if (task.priority === 'URGENT') {
+      throw new ForbiddenException('Cannot reschedule urgent tasks');
+    }
+
+    const targetDate = new Date(to);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (targetDate < today) {
+      throw new ForbiddenException('Cannot move to past date');
+    }
+
+    return await this.prismaService.assignment.update({
+      where: { id },
+      data: {
+        dueDay: targetDate,
+      },
+    });
+  }
+
   private async getUserGroupIds(userId: string): Promise<string[]> {
     const rows = await this.prismaService.userGroup.findMany({
       where: { userId },

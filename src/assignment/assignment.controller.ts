@@ -24,6 +24,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { RescheduleAssignmentDto } from './dto/reschedule-assignment.dto';
 
 @ApiTags('Assignment')
 @ApiBearerAuth()
@@ -131,6 +132,41 @@ export class AssignmentController {
       assignmentId,
       status,
       userId,
+    );
+  }
+
+  @Authorization()
+  @ApiOperation({ summary: 'Подтвердить перенос дедлайна' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'ID задания',
+    example: 'c2f8f5d2-8f14-4b1d-9f1e-4a5f2e93f991',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        to: {
+          type: 'string',
+          format: 'date',
+          example: '2026-05-14',
+          description: 'Новая дата дедлайна',
+        },
+      },
+      required: ['to'],
+    },
+  })
+  @Patch(':id/reschedule')
+  async rescheduleAssignment(
+    @Authorized('id') userId: string,
+    @Param('id') assignmentId: string,
+    @Body() dto: RescheduleAssignmentDto,
+  ) {
+    return await this.assignmentService.rescheduleAssignment(
+      userId,
+      assignmentId,
+      dto.to,
     );
   }
 
