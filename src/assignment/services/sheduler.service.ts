@@ -127,6 +127,9 @@ export class SchedulerService {
     let bestDate: string | null = null;
     let bestScore = Infinity;
 
+    let fallbackDate: string | null = null;
+    let fallbackScore = Infinity;
+
     for (let offset = 1; offset <= this.MAX_SEARCH_DAYS; offset++) {
       const candidate = new Date(task.dueDay);
       candidate.setDate(candidate.getDate() + offset);
@@ -136,16 +139,23 @@ export class SchedulerService {
       const candidateScore = scores.get(key) ?? 0;
       const newScore = candidateScore + this.weights[task.priority];
 
-      if (newScore >= this.THRESHOLD) continue; //нахуй нам дата не нужна
+      if (newScore < this.THRESHOLD) {
+        const cost = newScore + offset * 0.2;
 
-      const cost = newScore + offset * 0.2;
+        if (cost < bestScore) {
+          bestScore = cost;
+          bestDate = key;
+        }
+      }
 
-      if (cost < bestScore) {
-        bestScore = cost;
-        bestDate = key;
+      const fallbackCost = newScore + offset * 0.5;
+
+      if (fallbackCost < fallbackScore) {
+        fallbackScore = fallbackCost;
+        fallbackDate = key;
       }
     }
 
-    return bestDate;
+    return bestDate ?? fallbackDate;
   }
 }
