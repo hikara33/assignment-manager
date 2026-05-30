@@ -272,11 +272,9 @@ export class AssignmentService {
   }
 
   async rescheduleAssignment(userId: string, id: string, to: string) {
-    const task = await this.prismaService.assignment.findFirst({
-      where: {
-        id,
-        userId,
-      },
+    await this.assertAssignmentAccess(userId, id);
+    const task = await this.prismaService.assignment.findUnique({
+      where: { id },
     });
 
     if (!task) throw new NotFoundException('Task not found');
@@ -285,12 +283,24 @@ export class AssignmentService {
       throw new ForbiddenException('Cannot reschedule urgent tasks');
     }
 
+    if (task.status === 'COMPLETED')
+      throw new ForbiddenException('Cannot reschedule completed task');
+
     const targetDate = new Date(to);
+    targetDate.setHours(0, 0, 0, 0);
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     if (targetDate < today) {
       throw new ForbiddenException('Cannot move to past date');
+    }
+
+    const currentDate = new Date(task.dueDay);
+    currentDate.setHours(0, 0, 0, 0);
+
+    if (currentDate.getTime() === targetDate.getTime()) {
+      throw new ConflictException('Task is already scheduled for this date');
     }
 
     return await this.prismaService.assignment.update({
