@@ -303,6 +303,30 @@ export class AssignmentService {
       throw new ConflictException('Task is already scheduled for this date');
     }
 
+    const groupIds = await this.getUserGroupIds(userId);
+    const visibilityTasks = await this.prismaService.assignment.findMany({
+      where: {
+        AND: [
+          AssignmentQueryBuilder.buildVisibilityWhere(userId, groupIds),
+          {
+            dueDay: targetDate,
+            status: 'PENDING',
+          },
+        ],
+      },
+    });
+
+    const scoreDate = visibilityTasks.reduce(
+      (sum, t) => sum + this.scheduler.getWeight(t.priority),
+      0,
+    );
+
+    const taskWeight = this.scheduler.getWeight(task.priority);
+
+    if (!this.scheduler.canFitInDay(scoreDate, taskWeight)) {
+      throw new ConflictException('Target day is overloaded');
+    }
+
     return await this.prismaService.assignment.update({
       where: { id },
       data: {

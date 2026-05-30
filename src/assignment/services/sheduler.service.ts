@@ -82,6 +82,14 @@ export class SchedulerService {
     return suggestions;
   }
 
+  canFitInDay(dateScore: number, taskWeight: number): boolean {
+    return dateScore + taskWeight <= this.THRESHOLD;
+  }
+
+  getWeight(priority: AssignmentPriority): number {
+    return this.weights[priority];
+  }
+
   private groupByDate(tasks: Assignment[]) {
     const grouped = new Map<string, Assignment[]>();
 
