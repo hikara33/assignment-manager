@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           return typeof accessToken === 'string' ? accessToken : null;
         },
       ]),
-      secretOrKey: configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
+      secretOrKey: configService.getOrThrow<string>('JWT_TOKEN_SECRET'),
       ignoreExpiration: false,
       algorithms: ['HS256'],
     });
