@@ -272,12 +272,9 @@ export class AssignmentService {
   }
 
   async rescheduleAssignment(userId: string, id: string, to: string) {
-    await this.assertAssignmentAccess(userId, id);
-    const task = await this.prismaService.assignment.findUnique({
-      where: { id },
-    });
+    const task = await this.getAssignmentIfAccessible(userId, id);
 
-    if (!task) throw new NotFoundException('Task not found');
+    if (task.groupId) await this.checkOwner(task.groupId, userId);
 
     if (task.priority === 'URGENT') {
       throw new ForbiddenException('Cannot reschedule urgent tasks');
@@ -374,5 +371,26 @@ export class AssignmentService {
     assignmentId: string,
   ): Promise<void> {
     await this.getAssignmentIfAccessible(userId, assignmentId);
+  }
+
+  private async checkOwner(groupId: string, userId: string): Promise<void> {
+    const membership = await this.prismaService.userGroup.findUnique({
+      where: {
+        userId_groupId: {
+          userId,
+          groupId,
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new ForbiddenException('You are not a member of this group');
+    }
+
+    if (membership.role !== 'OWNER') {
+      throw new ForbiddenException(
+        'Only group owner can reschedule group assignments',
+      );
+    }
   }
 }
