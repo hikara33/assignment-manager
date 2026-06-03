@@ -22,7 +22,7 @@ export class BruteForceService {
     }
   }
 
-  async registerFailedAttempts(ip: string): Promise<void> {
+  async registerFailedAttempt(ip: string): Promise<void> {
     const redis = this.redisService.getClient();
 
     const key = `auth:failed:${ip}`;

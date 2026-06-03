@@ -16,6 +16,7 @@ import { LoginRequest } from './dto/login.dto';
 import ms from 'ms';
 import type { CookieOptions } from 'express';
 import type { RefreshToken } from 'src/generated/prisma/client';
+import { BruteForceService } from './services/brute-force.service';
 
 @Injectable()
 export class AuthService {
@@ -30,6 +31,7 @@ export class AuthService {
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly bruteForceService: BruteForceService,
   ) {
     this.JWT_ACCESS_TOKEN_TTL = this.configService.getOrThrow<
       NonNullable<SignOptions['expiresIn']>
@@ -76,7 +78,10 @@ export class AuthService {
     return await this.auth(res, user.id, user.name);
   }
 
-  async login(res: Response, dto: LoginRequest) {
+  async login(ip: string, res: Response, dto: LoginRequest) {
+    console.log(ip);
+    await this.bruteForceService.checkBlocked(ip);
+
     const { email, password } = dto;
 
     const user = await this.prismaService.user.findUnique({
@@ -90,15 +95,15 @@ export class AuthService {
       },
     });
 
-    if (!user) {
-      throw new NotFoundException('Пользователь не найден');
+    const isPasswordValid =
+      user && (await bcrypt.compare(password, user.password));
+
+    if (!isPasswordValid) {
+      await this.bruteForceService.registerFailedAttempt(ip);
+      throw new UnauthorizedException('Неверный email или пароль');
     }
 
-    const comparePassword = await bcrypt.compare(password, user.password);
-    if (!comparePassword) {
-      throw new NotFoundException('Пользователь не найден');
-    }
-
+    await this.bruteForceService.clearAttempts(ip);
     return await this.auth(res, user.id, user.name);
   }
 

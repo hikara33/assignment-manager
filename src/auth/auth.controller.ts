@@ -43,10 +43,11 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   async login(
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
     @Body() dto: LoginRequest,
   ) {
-    return await this.authService.login(res, dto);
+    return await this.authService.login(req.ip!, res, dto);
   }
 
   @ApiOperation({ summary: 'Выход пользователя' })
