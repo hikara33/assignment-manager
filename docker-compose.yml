@@ -11,16 +11,13 @@ services:
     container_name: assignment-manager-app
     env_file:
       - .env
-    volumes:
-      - .:/app
-      - /app/node_modules
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_started
     restart: on-failure
-    command: sh -c "npx prisma migrate deploy && npm run start:dev"
+    command: sh -c "npx prisma migrate deploy && node dist/main"
   
   db:
     image: postgres:16
