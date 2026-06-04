@@ -9,12 +9,15 @@ export class BruteForceService {
 
   constructor(private readonly redisService: RedisService) {}
 
-  async checkBlocked(ip: string): Promise<void> {
+  async checkBlocked(ip: string, email: string): Promise<void> {
     const redis = this.redisService.getClient();
 
-    const blocked = await redis.exists(`auth:blocked:${ip}`);
+    const [ipBlocked, emailBlocked] = await Promise.all([
+      redis.exists(this.getIpBlockKey(ip)),
+      redis.exists(this.getEmailBlockKey(email)),
+    ]);
 
-    if (blocked) {
+    if (ipBlocked || emailBlocked) {
       throw new HttpException(
         'Слишком много попыток входа. Попробуйте позже',
         HttpStatus.TOO_MANY_REQUESTS,
@@ -22,24 +25,58 @@ export class BruteForceService {
     }
   }
 
-  async registerFailedAttempt(ip: string): Promise<void> {
+  async registerFailedAttempt(ip: string, email: string): Promise<void> {
     const redis = this.redisService.getClient();
 
-    const key = `auth:failed:${ip}`;
-    const attempts = await redis.incr(key);
+    const ipKey = this.getIpFailKey(ip);
+    const emailKey = this.getEmailFailKey(email);
 
-    if (attempts === 1) {
-      await redis.expire(key, this.WINDOW_SECONDS);
+    const [ipAttempts, emailAttempts] = await Promise.all([
+      redis.incr(ipKey),
+      redis.incr(emailKey),
+    ]);
+
+    const pipline = redis.multi();
+
+    if (ipAttempts === 1) pipline.expire(ipKey, this.WINDOW_SECONDS);
+    if (emailAttempts === 1) pipline.expire(emailKey, this.WINDOW_SECONDS);
+
+    if (ipAttempts >= this.MAX_ATTEMPTS) {
+      pipline.set(this.getIpBlockKey(ip), '1', 'EX', this.BLOCK_TIME_SECONDS);
+      pipline.del(ipKey);
     }
 
-    if (attempts >= this.MAX_ATTEMPTS) {
-      await redis.set(`auth:blocked:${ip}`, '1', 'EX', this.BLOCK_TIME_SECONDS);
-      await redis.del(key);
+    if (emailAttempts >= this.MAX_ATTEMPTS) {
+      pipline.set(
+        this.getEmailBlockKey(ip),
+        '1',
+        'EX',
+        this.BLOCK_TIME_SECONDS,
+      );
+      pipline.del(emailKey);
     }
+
+    await pipline.exec();
   }
 
-  async clearAttempts(ip: string): Promise<void> {
+  async clearAttempts(ip: string, email: string): Promise<void> {
     const redis = this.redisService.getClient();
-    await redis.del(`auth:failed:${ip}`);
+    await redis.del(this.getIpFailKey(ip), this.getEmailFailKey(email));
+  }
+
+  private getIpFailKey(ip: string) {
+    return `auth:failed:${ip}`;
+  }
+
+  private getIpBlockKey(ip: string) {
+    return `auth:blocked:${ip}`;
+  }
+
+  private getEmailFailKey(email: string) {
+    return `auth:failed:${email}`;
+  }
+
+  private getEmailBlockKey(email: string) {
+    return `auth:blocked:${email}`;
   }
 }

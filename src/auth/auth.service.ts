@@ -80,7 +80,7 @@ export class AuthService {
 
   async login(ip: string, res: Response, dto: LoginRequest) {
     console.log(ip);
-    await this.bruteForceService.checkBlocked(ip);
+    await this.bruteForceService.checkBlocked(ip, dto.email);
 
     const { email, password } = dto;
 
@@ -99,11 +99,11 @@ export class AuthService {
       user && (await bcrypt.compare(password, user.password));
 
     if (!isPasswordValid) {
-      await this.bruteForceService.registerFailedAttempt(ip);
+      await this.bruteForceService.registerFailedAttempt(ip, email);
       throw new UnauthorizedException('Неверный email или пароль');
     }
 
-    await this.bruteForceService.clearAttempts(ip);
+    await this.bruteForceService.clearAttempts(ip, email);
     return await this.auth(res, user.id, user.name);
   }
 
