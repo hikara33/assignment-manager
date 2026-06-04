@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { WorkloadResult } from '../interfaces/workload.interface';
 import { AssignmentQueryBuilder } from '../builders/assignment-query.builder';
 
 @Injectable()
@@ -70,19 +69,5 @@ export class WorkloadService {
       tomorrow: tomorrowTasks,
       week: weekTasks,
     };
-  }
-
-  generatesuggestions(workload: WorkloadResult) {
-    const suggestions: string[] = [];
-
-    if (workload.tomorrow >= 4) {
-      suggestions.push('You have many tasks tomorrow. Consider starting today');
-    }
-
-    if (workload.today === 0) {
-      suggestions.push('No tasks today. Good time to start upcoming work ^^');
-    }
-
-    return suggestions;
   }
 }

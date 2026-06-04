@@ -13,14 +13,19 @@ import { ConflictDetectorService } from './services/conflict-detector.service';
 import { WorkloadService } from './services/workload.service';
 import { SchedulerService } from './services/sheduler.service';
 import { AssignmentQueryBuilder } from './builders/assignment-query.builder';
+import { CacheService } from './services/cache.service';
+import { DashboardResult } from './interfaces/dashboard.interface';
 
 @Injectable()
 export class AssignmentService {
+  private readonly DASHBOARD_TTL = 60;
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly conflictDetector: ConflictDetectorService,
     private readonly workload: WorkloadService,
     private readonly scheduler: SchedulerService,
+    private readonly cache: CacheService,
   ) {}
 
   async create(userId: string, dto: CreateAssignmentRequest) {
@@ -39,7 +44,7 @@ export class AssignmentService {
     }
 
     try {
-      return await this.prismaService.assignment.create({
+      const assignment = await this.prismaService.assignment.create({
         data: {
           title,
           description,
@@ -50,6 +55,9 @@ export class AssignmentService {
           priority,
         },
       });
+
+      await this.cache.bumpUserVersion(userId);
+      return assignment;
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === 'P2002') {
@@ -131,6 +139,9 @@ export class AssignmentService {
         priority: newData.priority,
       },
     });
+
+    await this.cache.bumpUserVersion(userId);
+
     return updatedAssignment;
   }
 
@@ -140,6 +151,9 @@ export class AssignmentService {
     await this.prismaService.assignment.delete({
       where: { id: assignmentId },
     });
+
+    await this.cache.bumpUserVersion(userId);
+
     return true;
   }
 
@@ -150,10 +164,14 @@ export class AssignmentService {
   ) {
     await this.assertAssignmentAccess(userId, assignmentId);
 
-    return await this.prismaService.assignment.update({
+    const updated = await this.prismaService.assignment.update({
       where: { id: assignmentId },
       data: { status },
     });
+
+    await this.cache.bumpUserVersion(userId);
+
+    return updated;
   }
 
   async getAllForGroup(groupId: string, dto?: GetAssignmentsDto) {
@@ -187,6 +205,12 @@ export class AssignmentService {
   }
 
   async getDashboard(userId: string) {
+    const version = await this.cache.getVersionKey(userId);
+    const cacheKey = `dashboard:${userId}:v${version}`;
+
+    const cached = await this.cache.get<DashboardResult>(cacheKey);
+    if (cached) return cached;
+
     const now = new Date();
     const groupIds = await this.getUserGroupIds(userId);
     const visible = AssignmentQueryBuilder.buildVisibilityWhere(
@@ -235,7 +259,7 @@ export class AssignmentService {
         }),
       ]);
 
-    return {
+    const result: DashboardResult = {
       workload,
       total,
       pending,
@@ -243,6 +267,9 @@ export class AssignmentService {
       overdue,
       urgent,
     };
+
+    await this.cache.set(cacheKey, result, this.DASHBOARD_TTL);
+    return result;
   }
 
   async detectConflicts(userId: string) {
@@ -324,12 +351,16 @@ export class AssignmentService {
       throw new ConflictException('Target day is overloaded');
     }
 
-    return await this.prismaService.assignment.update({
+    const result = await this.prismaService.assignment.update({
       where: { id },
       data: {
         dueDay: targetDate,
       },
     });
+
+    await this.cache.bumpUserVersion(userId);
+
+    return result;
   }
 
   private async getUserGroupIds(userId: string): Promise<string[]> {

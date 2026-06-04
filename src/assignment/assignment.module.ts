@@ -5,6 +5,7 @@ import { PriorityResolverService } from './services/priority-resolver.service';
 import { ConflictDetectorService } from './services/conflict-detector.service';
 import { WorkloadService } from './services/workload.service';
 import { SchedulerService } from './services/sheduler.service';
+import { CacheService } from './services/cache.service';
 
 @Module({
   controllers: [AssignmentController],
@@ -14,6 +15,7 @@ import { SchedulerService } from './services/sheduler.service';
     ConflictDetectorService,
     WorkloadService,
     SchedulerService,
+    CacheService,
   ],
 })
 export class AssignmentModule {}
