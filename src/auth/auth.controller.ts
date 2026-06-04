@@ -6,6 +6,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterRequest } from './dto/register.dto';
@@ -21,6 +22,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { LoginRateLimitGuard } from './guards/login-rate-limit.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -40,6 +42,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Логин пользователя' })
   @ApiBody({ type: LoginRequest })
   @ApiOkResponse({ description: 'Access token выдан' })
+  @UseGuards(LoginRateLimitGuard)
   @Post('login')
   @HttpCode(200)
   async login(

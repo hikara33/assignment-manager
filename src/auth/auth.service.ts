@@ -80,7 +80,6 @@ export class AuthService {
 
   async login(ip: string, res: Response, dto: LoginRequest) {
     console.log(ip);
-    await this.bruteForceService.checkBlocked(ip, dto.email);
 
     const { email, password } = dto;
 
@@ -104,6 +103,7 @@ export class AuthService {
     }
 
     await this.bruteForceService.clearAttempts(ip, email);
+
     return await this.auth(res, user.id, user.name);
   }
 

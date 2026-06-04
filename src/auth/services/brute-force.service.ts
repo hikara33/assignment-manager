@@ -48,7 +48,7 @@ export class BruteForceService {
 
     if (emailAttempts >= this.MAX_ATTEMPTS) {
       pipline.set(
-        this.getEmailBlockKey(ip),
+        this.getEmailBlockKey(email),
         '1',
         'EX',
         this.BLOCK_TIME_SECONDS,
