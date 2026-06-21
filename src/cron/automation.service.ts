@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { EmailService } from 'src/group/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ReminderEmailJob } from 'src/queue/interfaces/email-job.interface';
+import { QueueService } from 'src/queue/queue.service';
 
 @Injectable()
 export class AutomationService {
@@ -9,7 +10,7 @@ export class AutomationService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly emailService: EmailService,
+    private readonly queue: QueueService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -39,7 +40,7 @@ export class AutomationService {
     const end = new Date(reminderDate);
     end.setHours(23, 59, 59, 999);
 
-    const taskDue = await this.prisma.assignment.findMany({
+    const tasks = await this.prisma.assignment.findMany({
       where: {
         dueDay: {
           gte: start,
@@ -59,28 +60,33 @@ export class AutomationService {
       },
     });
 
-    const sendForTask = (task: (typeof taskDue)[number]) => {
+    const jobs: ReminderEmailJob[] = [];
+
+    for (const task of tasks) {
       const emails = new Set<string>();
+
       if (task.user?.email) emails.add(task.user.email);
-      if (task.group?.members) {
-        for (const m of task.group.members) {
-          emails.add(m.user.email);
-        }
+
+      for (const member of task.group?.members ?? []) {
+        if (member.user.email) emails.add(member.user.email);
       }
-      return Promise.all(
-        [...emails].map((email) =>
-          this.emailService.sendAssignmentReminder(
-            email,
-            task.title,
-            task.dueDay,
-          ),
-        ),
-      );
-    };
 
-    await Promise.all(taskDue.map((task) => sendForTask(task)));
+      for (const email of emails) {
+        jobs.push({
+          type: 'deadline-reminder',
+          email,
+          taskTitle: task.title,
+          dueDay: task.dueDay.toISOString(),
+          assignmentId: task.id,
+        });
+      }
+    }
 
-    this.logger.log(`Sent ${taskDue.length} deadline reminders`);
+    if (jobs.length > 0) {
+      await this.queue.addReminderEmail(jobs);
+    }
+
+    this.logger.log(`Sent ${jobs.length} deadline reminders`);
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM)

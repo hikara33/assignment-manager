@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { SignOptions } from 'jsonwebtoken';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { EmailService } from '../email/email.service';
 import { InvitePayload } from '../interfaces/jwt-invite.interface';
 import * as crypto from 'crypto';
 import { GroupInvite, Prisma, User } from 'src/generated/prisma/client';
@@ -23,7 +22,6 @@ export class InviteService {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly emailService: EmailService,
     private readonly queue: QueueService,
   ) {
     this.JWT_INVITE_TTL =

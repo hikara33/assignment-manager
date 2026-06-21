@@ -10,6 +10,7 @@ import { GroupModule } from './group/group.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from './redis/redis.module';
 import { QueueModule } from './queue/queue.module';
+import { AutomationService } from './cron/automation.service';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { QueueModule } from './queue/queue.module';
     QueueModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AutomationService],
 })
 export class AppModule {}
