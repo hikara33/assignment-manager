@@ -13,6 +13,7 @@ import { EmailService } from '../email/email.service';
 import { InvitePayload } from '../interfaces/jwt-invite.interface';
 import * as crypto from 'crypto';
 import { GroupInvite, Prisma, User } from 'src/generated/prisma/client';
+import { QueueService } from 'src/queue/queue.service';
 
 @Injectable()
 export class InviteService {
@@ -23,6 +24,7 @@ export class InviteService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
+    private readonly queue: QueueService,
   ) {
     this.JWT_INVITE_TTL =
       configService.getOrThrow<SignOptions['expiresIn']>('JWT_INVITE_TTL');
@@ -97,7 +99,7 @@ export class InviteService {
       return invite;
     });
 
-    await this.emailService.sendGroupInvite(email, token);
+    await this.queue.addInviteEmail(email, token);
     return result;
   }
 

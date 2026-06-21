@@ -20,4 +20,11 @@ export class RedisService implements OnModuleDestroy {
   async onModuleDestroy() {
     await this.redis.quit();
   }
+
+  getConnectionOptions() {
+    return {
+      host: this.configService.getOrThrow<string>('REDIS_HOST'),
+      port: Number(this.configService.getOrThrow<string>('REDIS_PORT')),
+    };
+  }
 }

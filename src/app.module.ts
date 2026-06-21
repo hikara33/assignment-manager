@@ -9,6 +9,7 @@ import { SubjectModule } from './subject/subject.module';
 import { GroupModule } from './group/group.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from './redis/redis.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { RedisModule } from './redis/redis.module';
     GroupModule,
     ScheduleModule.forRoot(),
     RedisModule,
+    QueueModule,
   ],
   controllers: [AppController],
   providers: [AppService],
